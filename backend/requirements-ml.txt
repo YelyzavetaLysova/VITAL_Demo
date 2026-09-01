@@ -1,0 +1,4 @@
+# Install after requirements.txt to enable real article-level ML analysis.
+transformers>=4.55,<5
+torch>=2.7
+sentencepiece>=0.2

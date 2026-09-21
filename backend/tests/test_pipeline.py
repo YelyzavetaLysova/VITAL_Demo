@@ -1,4 +1,10 @@
-from app.pipeline import assessment, claim_text, is_probably_health_claim, normalise_evidence, offsets
+from app.pipeline import (
+    assessment,
+    claim_text,
+    is_probably_health_claim,
+    normalise_evidence,
+    offsets,
+)
 from app.article_analysis import provider_lookup
 
 
@@ -13,11 +19,15 @@ def test_claim_variants():
 
 
 def test_offsets():
-    assert offsets("Before Coffee improves health. After", "Coffee improves health.") == (7, 30)
+    assert offsets(
+        "Before Coffee improves health. After", "Coffee improves health."
+    ) == (7, 30)
 
 
 def test_stance_normalisation():
-    evidence = normalise_evidence({"evidence": [{"title": "Study", "stance": "supports", "snippet": "Result"}]})
+    evidence = normalise_evidence(
+        {"evidence": [{"title": "Study", "stance": "supports", "snippet": "Result"}]}
+    )
     assert evidence[0].stance == "supports"
     assert assessment({"finalPrediction": "supported"}, evidence)[0] == "supported"
 
@@ -92,6 +102,8 @@ def test_factiverse_mixed_and_insufficient_evidence_labels():
 
 def test_provider_lookup(tmp_path):
     metadata = tmp_path / "providers.csv"
-    metadata.write_text("domain,name,credibility,bias,country\ncnn.com,CNN,high,left-center,US\n")
+    metadata.write_text(
+        "domain,name,credibility,bias,country\ncnn.com,CNN,high,left-center,US\n"
+    )
     result = provider_lookup("https://edition.cnn.com/health/story", str(metadata))
     assert result and result.name == "CNN" and result.credibility == "high"

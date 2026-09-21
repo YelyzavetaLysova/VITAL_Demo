@@ -7,7 +7,6 @@ from .config import Settings
 from .factiverse import FactiverseClient, FactiverseError
 from .schemas import AnalyseRequest, ClaimResult, EvidenceItem
 
-
 HEALTH_TERMS = {
     "health",
     "healthy",
@@ -256,10 +255,7 @@ def factiverse_final_label(raw: dict[str, Any]) -> Any:
 
     label_map = raw.get("labelMap")
 
-    if (
-        prediction is not None
-        and isinstance(label_map, dict)
-    ):
+    if prediction is not None and isinstance(label_map, dict):
         for label_name, label_value in label_map.items():
             if label_value == prediction:
                 return label_name
@@ -287,19 +283,33 @@ def evidence_description(raw: dict[str, Any]) -> str:
     if isinstance(description, str):
         return description.strip()
 
+    if isinstance(description, list):
+        return "\n\n".join(
+            evidence_description({"summary": item})
+            for item in description
+            if item is not None
+        ).strip()
+    if isinstance(description, dict):
+        return str(
+            first_value(description, "text", "summary", "explanation", "description")
+            or ""
+        ).strip()
     return str(description).strip()
 
 
 def normalise_evidence(
     raw: dict[str, Any],
 ) -> list[EvidenceItem]:
-    items = first_value(
-        raw,
-        "evidence",
-        "sources",
-        "results",
-        "documents",
-    ) or []
+    items = (
+        first_value(
+            raw,
+            "evidence",
+            "sources",
+            "results",
+            "documents",
+        )
+        or []
+    )
 
     if isinstance(items, dict):
         items = list(items.values())
@@ -368,9 +378,7 @@ def normalise_evidence(
                     "text",
                     "summary",
                 ),
-                stance=normalise_stance(
-                    stance_value
-                ),
+                stance=normalise_stance(stance_value),
                 source_type=first_value(
                     item,
                     "sourceType",
@@ -387,16 +395,28 @@ def normalise_evidence(
                 preferred_site=first_value(item, "preferred_site", "preferredSite"),
                 original_query=first_value(item, "original_query", "originalQuery"),
                 translated=first_value(item, "translated"),
-                translated_query=first_value(item, "translated_query", "translatedQuery"),
+                translated_query=first_value(
+                    item, "translated_query", "translatedQuery"
+                ),
                 rewritten_query=first_value(item, "rewritten_query", "rewrittenQuery"),
                 predicted_label=first_value(item, "predictedLabel"),
                 softmax_score=item.get("softmaxScore") or [],
                 detailed_label=first_value(item, "detailedLabelDescription"),
                 reliability=(item.get("domain_reliability") or {}).get("Reliability"),
-                bias=((item.get("domain_reliability") or {}).get("bias_data") or {}).get("bias"),
-                bias_source_url=((item.get("domain_reliability") or {}).get("bias_data") or {}).get("source_url"),
-                trust_score=((item.get("domain_reliability") or {}).get("reuters_trust_score") or {}).get("score"),
-                trust_score_source=((item.get("domain_reliability") or {}).get("reuters_trust_score") or {}).get("source"),
+                bias=(
+                    (item.get("domain_reliability") or {}).get("bias_data") or {}
+                ).get("bias"),
+                bias_source_url=(
+                    (item.get("domain_reliability") or {}).get("bias_data") or {}
+                ).get("source_url"),
+                trust_score=(
+                    (item.get("domain_reliability") or {}).get("reuters_trust_score")
+                    or {}
+                ).get("score"),
+                trust_score_source=(
+                    (item.get("domain_reliability") or {}).get("reuters_trust_score")
+                    or {}
+                ).get("source"),
                 factiverse=item,
             )
         )
@@ -475,46 +495,28 @@ def assessment(
         )
 
     # Fallback used only when Factiverse did not return a final verdict.
-    evidence_stances = {
-        item.stance
-        for item in evidence
-        if item.stance != "unknown"
-    }
+    evidence_stances = {item.stance for item in evidence if item.stance != "unknown"}
 
-    if (
-        "supports" in evidence_stances
-        and "contradicts" in evidence_stances
-    ):
+    if "supports" in evidence_stances and "contradicts" in evidence_stances:
         return (
             "mixed",
             "Mixed evidence",
             description
-            or (
-                "The retrieved sources do not consistently agree "
-                "about this claim."
-            ),
+            or ("The retrieved sources do not consistently agree " "about this claim."),
         )
 
     if "supports" in evidence_stances:
         return (
             "supported",
             "Supported",
-            description
-            or (
-                "The retrieved evidence generally supports "
-                "this claim."
-            ),
+            description or ("The retrieved evidence generally supports " "this claim."),
         )
 
     if "contradicts" in evidence_stances:
         return (
             "contradicted",
             "Contradicted",
-            description
-            or (
-                "The retrieved evidence generally refutes "
-                "this claim."
-            ),
+            description or ("The retrieved evidence generally refutes " "this claim."),
         )
 
     if "qualifies" in evidence_stances:
@@ -532,10 +534,7 @@ def assessment(
         "insufficient",
         "Insufficient evidence",
         description
-        or (
-            "VITAL could not find enough aligned evidence "
-            "to assess this claim."
-        ),
+        or ("VITAL could not find enough aligned evidence " "to assess this claim."),
     )
 
 
@@ -552,10 +551,7 @@ def demo_claims(
     candidates = [
         sentence.strip()
         for sentence in sentences
-        if (
-            len(sentence.split()) >= 7
-            and is_probably_health_claim(sentence)[0]
-        )
+        if (len(sentence.split()) >= 7 and is_probably_health_claim(sentence)[0])
     ]
 
     if not candidates and request.selected_text:
@@ -583,16 +579,9 @@ async def analyse(
 
     warnings: list[str] = []
 
-    live = (
-        bool(settings.factiverse_api_key)
-        and not settings.vital_demo_mode
-    )
+    live = bool(settings.factiverse_api_key) and not settings.vital_demo_mode
 
-    client = (
-        FactiverseClient(settings)
-        if live
-        else None
-    )
+    client = FactiverseClient(settings) if live else None
 
     if request.selected_text:
         await report_progress(
@@ -623,10 +612,7 @@ async def analyse(
             detected = demo_claims(request)
             live = False
 
-            warnings.append(
-                "Claim service unavailable; "
-                f"local fallback used: {exc}"
-            )
+            warnings.append("Claim service unavailable; " f"local fallback used: {exc}")
 
     else:
         detected = demo_claims(request)
@@ -637,11 +623,9 @@ async def analyse(
         )
 
     results: list[ClaimResult] = []
-    candidate_claims = [
-        item
-        for item in detected
-        if claim_text(item)
-    ][: settings.vital_max_claims]
+    candidate_claims = [item for item in detected if claim_text(item)][
+        : settings.vital_max_claims
+    ]
     total_claims = len(candidate_claims)
 
     for index, raw_claim in enumerate(candidate_claims):
@@ -667,8 +651,7 @@ async def analyse(
                 )
             except FactiverseError as exc:
                 warnings.append(
-                    "Evidence lookup failed for "
-                    f"claim {index + 1}: {exc}"
+                    "Evidence lookup failed for " f"claim {index + 1}: {exc}"
                 )
 
         evidence = normalise_evidence(stance_raw)
@@ -683,13 +666,9 @@ async def analyse(
             text,
         )
 
-        identifier = hashlib.sha256(
-            f"{text}:{index}".encode()
-        ).hexdigest()[:12]
+        identifier = hashlib.sha256(f"{text}:{index}".encode()).hexdigest()[:12]
 
-        raw_prediction_value = factiverse_final_label(
-            stance_raw
-        )
+        raw_prediction_value = factiverse_final_label(stance_raw)
 
         results.append(
             ClaimResult(

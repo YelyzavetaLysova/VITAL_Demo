@@ -1,68 +1,43 @@
 .vital-claim-highlight {
-  border-radius:3px!important;
-  padding:1px 2px!important;
-  background:#e9ecf2!important;
-  box-shadow:inset 0 -2px #687086!important;
-  cursor:pointer!important;
-  transition:box-shadow .2s,
-background .2s!important
+  color: #182c27 !important;
+  border-radius: 2px !important;
+  padding: 1px 0 !important;
+  background: #e9ecf2 !important;
+  box-shadow: inset 0 -2px #687086 !important;
+  cursor: pointer !important;
 }
-
 .vital-claim-highlight[data-vital-status="supported"] {
-  background:#dcf5eb!important;
-  box-shadow:inset 0 -2px #16856c!important
+  background: #dcf5eb !important;
+  box-shadow: inset 0 -2px #16856c !important;
 }
-
 .vital-claim-highlight[data-vital-status="contradicted"] {
-  background:#ffe1de!important;
-  box-shadow:inset 0 -2px #d94b4b!important
+  background: #ffe1de !important;
+  box-shadow: inset 0 -2px #d94b4b !important;
 }
-
 .vital-claim-highlight[data-vital-status="mixed"],
 .vital-claim-highlight[data-vital-status="context_needed"] {
-  background:#fff0bd!important;
-  box-shadow:inset 0 -2px #d69420!important
+  background: #fff0bd !important;
+  box-shadow: inset 0 -2px #a47419 !important;
 }
-
-.vital-claim-highlight.vital-focused {
-  outline:3px solid #3266df!important;
-  outline-offset:3px!important;
-  animation:vital-flash .9s ease 2!important
+.vital-claim-highlight.vital-focused,
+.vital-claim-highlight:focus-visible {
+  outline: 2px solid #176b60 !important;
+  outline-offset: 3px !important;
 }
-
-@keyframes vital-flash {
-  50% {
-  filter:brightness(1.14)
-}
-
-
-}
-
 .vital-selection-button {
-  all:initial!important;
-  position:fixed!important;
-  z-index:2147483647!important;
-  background:#172038!important;
-  color:#fff!important;
-  border-radius:8px!important;
-  padding:8px 11px!important;
-  box-shadow:0 8px 25px #17203855!important;
-  font:600 12px Arial,
-sans-serif!important;
-  cursor:pointer!important
+  all: initial !important;
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  background: #176b60 !important;
+  color: #fff !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  border-radius: 6px !important;
+  padding: 12px 14px !important;
+  font:
+    600 12px -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif !important;
+  cursor: pointer !important;
 }
-
-.vital-selection-button:before {
-  content:"V";
-  display:inline-grid;
-  place-items:center;
-  width:22px;
-  height:22px;
-  margin-right:7px;
-  border-radius:6px;
-  background:#3266df;
-  color:white;
-  font-weight:800
-}
-
-

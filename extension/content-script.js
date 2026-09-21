@@ -1,134 +1,198 @@
-let lastArticle = null;
 let selectionButton = null;
 
+const blockSelector = "h1,h2,h3,p,li,blockquote";
+const excludedSelector =
+  'nav,footer,aside,#vital-demo-panel,[aria-hidden="true"]';
+
 function articleRoot() {
-  return document.querySelector('article') || document.querySelector('main') || document.body;
+  const candidates = [
+    ...document.querySelectorAll('article,main,[role="main"]'),
+  ];
+  const readableLength = (root) =>
+    [...root.querySelectorAll("p,blockquote")]
+      .filter((node) => !node.closest(excludedSelector))
+      .reduce((total, node) => total + (node.innerText || "").length, 0);
+  candidates.sort((a, b) => readableLength(b) - readableLength(a));
+  return candidates[0] && readableLength(candidates[0]) >= 12
+    ? candidates[0]
+    : document.body;
+}
+
+function articleBlocks(root) {
+  return [...root.querySelectorAll(blockSelector)]
+    .filter((node) => !node.closest(excludedSelector))
+    .filter((node) => !node.parentElement.closest("li,blockquote"));
 }
 
 function extractPage() {
   const root = articleRoot();
-  const blocks = [...root.querySelectorAll('h1,h2,h3,p,li,blockquote')]
-    .filter(el => !el.closest('nav,footer,aside,[aria-hidden="true"]'));
-  const text = blocks.map(el => el.innerText.trim()).filter(Boolean).join('\n\n').slice(0, 120000);
-  const headline = root.querySelector('h1')?.innerText.trim() || document.title;
-  lastArticle = { url: location.href, title: headline, text, language: document.documentElement.lang || 'en' };
-  return lastArticle;
+  const text = articleBlocks(root)
+    .map((node) => node.innerText.trim())
+    .filter(Boolean)
+    .join("\n\n")
+    .slice(0, 120000);
+  return {
+    url: location.href,
+    title: root.querySelector("h1")?.innerText.trim() || document.title,
+    text,
+    language: document.documentElement.lang || "en",
+  };
 }
 
 function clearHighlights() {
-  document.querySelectorAll('.vital-claim-highlight').forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent)));
+  document.querySelectorAll(".vital-claim-highlight").forEach((mark) => {
+    // Preserve original inline links and formatting when removing a highlight.
+    mark.replaceWith(...mark.childNodes);
+  });
   articleRoot().normalize();
 }
 
+function normalisedText(text) {
+  const positions = [];
+  let value = "";
+  for (let index = 0; index < text.length; index++) {
+    const char = /\s/.test(text[index]) ? " " : text[index].toLowerCase();
+    if (char === " " && value.endsWith(" ")) continue;
+    positions.push(index);
+    value += char;
+  }
+  return { value, positions };
+}
+
 function highlightClaim(claim) {
-  const root = articleRoot();
-  const needle = claim.text.trim().toLowerCase();
-  const blocks = [...root.querySelectorAll('h1,h2,h3,p,li,blockquote')];
-  for (const block of blocks) {
-    if (block.closest('nav,footer,.vital-claim-highlight')) continue;
+  const needle = normalisedText(claim.text.trim()).value;
+  if (!needle) return false;
+  for (const block of articleBlocks(articleRoot())) {
+    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
     const nodes = [];
-    const walker = document.createTreeWalker(
-      block,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode(node) {
-          return node.nodeValue
-            ? NodeFilter.FILTER_ACCEPT
-            : NodeFilter.FILTER_REJECT;
-        }
-      }
-    );
-    let textNode;
-    let combined = '';
-
-    while ((textNode = walker.nextNode())) {
+    let combined = "";
+    let current;
+    while ((current = walker.nextNode())) {
       nodes.push({
-        node: textNode,
+        node: current,
         start: combined.length,
-        end: combined.length + textNode.nodeValue.length
+        end: combined.length + current.nodeValue.length,
       });
-      combined += textNode.nodeValue;
+      combined += current.nodeValue;
     }
-
-    const index = combined.toLowerCase().indexOf(needle);
-    if (index < 0) continue;
-
-    const finish = index + claim.text.length;
+    const normalised = normalisedText(combined);
+    const match = normalised.value.indexOf(needle);
+    if (match < 0) continue;
+    const start = normalised.positions[match];
+    const finish = normalised.positions[match + needle.length - 1] + 1;
     const startPart = nodes.find(
-      part => index >= part.start && index < part.end
+      (part) => start >= part.start && start < part.end,
     );
     const endPart = nodes.find(
-      part => finish > part.start && finish <= part.end
+      (part) => finish > part.start && finish <= part.end,
     );
     if (!startPart || !endPart) continue;
+    if (
+      nodes.some(
+        (part) =>
+          part.end > start &&
+          part.start < finish &&
+          part.node.parentElement.closest(".vital-claim-highlight"),
+      )
+    )
+      continue;
     const range = document.createRange();
-    range.setStart(startPart.node,index-startPart.start);range.setEnd(endPart.node,finish-endPart.start);
-    const mark = document.createElement('mark');
-    mark.className = 'vital-claim-highlight';
+    range.setStart(startPart.node, start - startPart.start);
+    range.setEnd(endPart.node, finish - endPart.start);
+    const mark = document.createElement("mark");
+    mark.className = "vital-claim-highlight";
     mark.dataset.vitalClaimId = claim.id;
     mark.dataset.vitalStatus = claim.status;
     mark.title = `${claim.status_label} — open VITAL for evidence`;
-    mark.addEventListener('click', () => chrome.runtime.sendMessage({ type: 'VITAL_CLAIM_SELECTED', claimId: claim.id }));
+    mark.tabIndex = 0;
+    mark.setAttribute("role", "button");
+    mark.setAttribute(
+      "aria-label",
+      `${claim.status_label}. Open claim in VITAL.`,
+    );
+    mark.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      chrome.runtime
+        .sendMessage({ type: "VITAL_CLAIM_SELECTED", claimId: claim.id })
+        .catch(console.error);
+    });
+    mark.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        mark.click();
+      }
+    });
     try {
       mark.append(range.extractContents());
       range.insertNode(mark);
-    } catch (_error) {
-      continue;
+      return true;
+    } catch {
+      // Some site DOM structures cannot be safely wrapped.
     }
-    return true;
   }
   return false;
 }
 
 function showSelectionAction(selection) {
   selectionButton?.remove();
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-  selectionButton = document.createElement('button');
-  selectionButton.className = 'vital-selection-button';
-  selectionButton.textContent = 'Check with VITAL';
-  selectionButton.style.left = `${Math.min(innerWidth - 155, Math.max(8, rect.left + rect.width / 2 - 75))}px`;
+  if (!selection.rangeCount) return;
+  const rect = selection.getRangeAt(0).getBoundingClientRect();
+  const selectedText = selection.toString().trim();
+  selectionButton = document.createElement("button");
+  selectionButton.className = "vital-selection-button";
+  selectionButton.textContent = "Check with VITAL";
+  selectionButton.style.left = `${Math.min(innerWidth - 155, Math.max(8, rect.left))}px`;
   selectionButton.style.top = `${Math.max(8, rect.top - 48)}px`;
-  selectionButton.addEventListener('mousedown', event => {
+  const checkSelection = (event) => {
     event.preventDefault();
-    const selectedText = selection.toString().trim();
-    chrome.runtime.sendMessage({ type: 'VITAL_CHECK_SELECTION', payload: { ...extractPage(), selected_text: selectedText } });
+    chrome.runtime
+      .sendMessage({
+        type: "VITAL_CHECK_SELECTION",
+        payload: { ...extractPage(), selected_text: selectedText },
+      })
+      .catch(console.error);
     selection.removeAllRanges();
-    selectionButton.remove();
+    selectionButton?.remove();
+  };
+  selectionButton.addEventListener("pointerdown", checkSelection);
+  selectionButton.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") checkSelection(event);
   });
-  document.body.appendChild(selectionButton);
+  document.body.append(selectionButton);
 }
 
-document.addEventListener('selectionchange', () => {
+document.addEventListener("selectionchange", () => {
   const selection = getSelection();
-  const text = selection?.toString().trim();
-  if (text?.length >= 12 && articleRoot().contains(selection.anchorNode)) showSelectionAction(selection);
-  else selectionButton?.remove();
+  if (
+    selection?.toString().trim().length >= 12 &&
+    articleRoot().contains(selection.anchorNode)
+  ) {
+    showSelectionAction(selection);
+  } else {
+    selectionButton?.remove();
+  }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'VITAL_EXTRACT_PAGE') {
-    sendResponse(extractPage());
-    return;
-  }
-  if (message.type === 'VITAL_HIGHLIGHT') {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "VITAL_EXTRACT_PAGE") sendResponse(extractPage());
+  if (message.type === "VITAL_HIGHLIGHT") {
     clearHighlights();
     sendResponse({ highlighted: message.claims.filter(highlightClaim).length });
   }
-  if (message.type === 'VITAL_FOCUS_CLAIM') {
-    const selector = `[data-vital-claim-id="${CSS.escape(message.claimId)}"]`;
-    const mark = document.querySelector(selector);
-
-    document.querySelectorAll('.vital-focused').forEach(item => {
-      item.classList.remove('vital-focused');
-    });
-
+  if (message.type === "VITAL_FOCUS_CLAIM") {
+    const mark = document.querySelector(
+      `[data-vital-claim-id="${CSS.escape(message.claimId)}"]`,
+    );
+    document
+      .querySelectorAll(".vital-focused")
+      .forEach((node) => node.classList.remove("vital-focused"));
     if (mark) {
-      mark.classList.add('vital-focused');
-      mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => mark.classList.remove('vital-focused'), 1800);
+      mark.classList.add("vital-focused");
+      mark.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => mark.classList.remove("vital-focused"), 1800);
     }
-
     sendResponse({ found: Boolean(mark) });
   }
+  return false;
 });

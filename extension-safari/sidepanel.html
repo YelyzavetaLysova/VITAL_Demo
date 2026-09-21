@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>VITAL · MediaFutures</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <img
+            id="brandLogo"
+            src="assets/mf-logo.png"
+            alt="MediaFutures"
+            width="40"
+            height="40"
+          />
+          <div><strong>VITAL</strong><span>MediaFutures</span></div>
+        </div>
+        <button id="newScan" class="primary compact">Scan page</button>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="VITAL sections">
+        <button
+          id="tab-claims"
+          role="tab"
+          aria-selected="true"
+          aria-controls="claims"
+          data-tab="claims"
+        >
+          Claims <span id="claimCount"></span>
+        </button>
+        <button
+          id="tab-article"
+          role="tab"
+          aria-selected="false"
+          aria-controls="article"
+          data-tab="article"
+        >
+          Article
+        </button>
+        <button
+          id="tab-source"
+          role="tab"
+          aria-selected="false"
+          aria-controls="source"
+          data-tab="source"
+        >
+          Source
+        </button>
+        <button
+          id="tab-settings"
+          role="tab"
+          aria-selected="false"
+          aria-controls="settings"
+          data-tab="settings"
+        >
+          Settings
+        </button>
+      </nav>
+
+      <main>
+        <div
+          id="progress"
+          class="progress-panel"
+          hidden
+          role="status"
+          aria-live="polite"
+        >
+          <div class="progress-heading">
+            <span class="spinner" aria-hidden="true"></span
+            ><strong id="progressTitle">Checking this page</strong
+            ><span id="elapsed"></span>
+          </div>
+          <p id="claimProgress"></p>
+          <p id="articleProgress"></p>
+          <progress
+            id="claimMeter"
+            max="1"
+            aria-label="Completed claim checks"
+          ></progress>
+          <p class="muted small">
+            All results appear together when processing finishes. You can keep
+            reading.
+          </p>
+        </div>
+        <div id="error" class="error-panel" hidden role="alert">
+          <strong>Scan could not finish</strong>
+          <p id="errorText"></p>
+          <button id="retry">Try again</button>
+        </div>
+
+        <section
+          id="claims"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-claims"
+        >
+          <div id="start" class="start-panel">
+            <p class="eyebrow">CURRENT PAGE</p>
+            <h1 id="pageTitle">Find and check claims</h1>
+            <p>Scan an article or select a passage to check it.</p>
+            <button id="scan" class="primary">Find claims</button>
+            <p class="small muted">
+              When you scan, article text is sent to your backend and
+              Factiverse. Classifiers run on the backend.
+            </p>
+          </div>
+          <form id="pasteForm" class="paste-panel" hidden>
+            <h1>Check an article</h1>
+            <label for="articleTitle"
+              >Headline <span class="muted">optional</span></label
+            >
+            <input id="articleTitle" maxlength="1000" autocomplete="off" />
+            <label for="articleUrl"
+              >Source URL <span class="muted">optional</span></label
+            >
+            <input
+              id="articleUrl"
+              type="url"
+              placeholder="https://…"
+              autocomplete="off"
+            />
+            <label for="articleText">Article text</label>
+            <textarea
+              id="articleText"
+              rows="8"
+              minlength="12"
+              maxlength="120000"
+              required
+              placeholder="Paste the article or a passage here"
+            ></textarea>
+            <button class="primary" type="submit">Find claims</button>
+            <p class="small muted">
+              Submitted text goes to this backend and Factiverse. This page
+              cannot highlight another browser tab.
+            </p>
+          </form>
+          <div id="claimResults" hidden>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow" id="resultDomain"></p>
+                <h1 id="resultHeading">Claims</h1>
+              </div>
+              <button id="collapseAll" class="text-button">Close all</button>
+            </div>
+            <p id="resultTitle" class="result-title"></p>
+            <p id="scopeNote" class="small muted"></p>
+            <div id="detectionFeedback"></div>
+            <p id="fallbackNotice" class="notice" hidden></p>
+            <div class="list-tools">
+              <label class="sr-only" for="statusFilter"
+                >Filter assessments</label
+              ><select id="statusFilter">
+                <option value="all">All results</option>
+                <option value="supported">Supported</option>
+                <option value="contradicted">Contradicted</option>
+                <option value="mixed">Mixed</option>
+                <option value="context_needed">Context needed</option>
+                <option value="insufficient">Insufficient</option>
+              </select>
+            </div>
+            <div id="claimList"></div>
+            <p id="noClaims" class="empty" hidden>
+              No checkable claims were found in the extracted text.
+            </p>
+            <p id="noMatches" class="empty" hidden>
+              No claims match this filter.
+            </p>
+            <details id="warnings" class="note-details" hidden>
+              <summary>Analysis notes</summary>
+              <div id="warningList"></div>
+            </details>
+          </div>
+        </section>
+
+        <section
+          id="article"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-article"
+          hidden
+        >
+          <div class="section-heading"><h1>Article</h1></div>
+          <p id="articleEmpty" class="empty">
+            Scan an article to see its topics and tone.
+          </p>
+          <div id="articleSections"></div>
+        </section>
+
+        <section
+          id="source"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-source"
+          hidden
+        >
+          <div class="section-heading"><h1>Source</h1></div>
+          <p id="sourceEmpty" class="empty">
+            Scan an article to look up its publisher.
+          </p>
+          <div id="sourceContent"></div>
+        </section>
+
+        <section
+          id="settings"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-settings"
+          hidden
+        >
+          <div class="section-heading">
+            <h1>Settings</h1>
+            <span id="settingsSaved" class="muted small" role="status"></span>
+          </div>
+          <form id="settingsForm">
+            <fieldset>
+              <legend>Appearance</legend>
+              <label for="theme">Theme</label
+              ><select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </fieldset>
+            <button class="primary" type="submit">Save settings</button>
+          </form>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          Automated assessments can be wrong. Check the sources. Not medical
+          advice.
+        </p>
+        <details class="note-details">
+          <summary>How to read results</summary>
+          <p>
+            Supported and contradicted describe the retrieved evidence, not
+            guaranteed truth. Insufficient evidence means no reliable assessment
+            could be made; it does not mean false.
+          </p>
+          <p>
+            Topic, advertorial and sentiment scores are model outputs, not
+            accuracy ratings. Local classifiers use a shortened article excerpt;
+            sentiment is English-only. Publisher metadata does not determine
+            whether a claim is correct.
+          </p>
+        </details>
+      </footer>
+    </div>
+    <script src="browser-api.js"></script>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

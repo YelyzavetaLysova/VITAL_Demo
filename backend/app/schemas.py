@@ -3,12 +3,20 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
+class AnalysisOptions(BaseModel):
+    topics: bool = True
+    advertorial: bool = True
+    sentiment: bool = True
+    provider: bool = True
+
+
 class AnalyseRequest(BaseModel):
     url: HttpUrl | None = None
     title: str = ""
     text: str = Field(min_length=12, max_length=120_000)
     selected_text: str | None = Field(default=None, max_length=10_000)
     language: str = "en"
+    options: AnalysisOptions = Field(default_factory=AnalysisOptions)
 
     @field_validator("language")
     @classmethod
@@ -62,7 +70,9 @@ class ClaimResult(BaseModel):
     end: int | None = None
     detection_score: float | None = None
     checkworthiness: float | None = None
-    status: Literal["supported", "contradicted", "mixed", "insufficient", "context_needed"]
+    status: Literal[
+        "supported", "contradicted", "mixed", "insufficient", "context_needed"
+    ]
     status_label: str
     explanation: str
     evidence: list[EvidenceItem] = []
@@ -135,3 +145,21 @@ class JobStatus(BaseModel):
     total_claims: int | None = None
     result: AnalyseResponse | None = None
     error: str | None = None
+    claim_message: str = ""
+    article_message: str = ""
+
+
+class FeedbackRequest(BaseModel):
+    analysis_id: str = Field(min_length=1, max_length=64)
+    client_id: str = Field(min_length=16, max_length=64, pattern=r"^[a-zA-Z0-9-]+$")
+    feature: Literal[
+        "claim", "detection", "topics", "advertorial", "sentiment", "provider", "system"
+    ]
+    claim_id: str = Field(default="", max_length=64)
+    rating: Literal["helpful", "not_helpful"]
+    comment: str = Field(default="", max_length=2000)
+
+    @field_validator("comment")
+    @classmethod
+    def trim_comment(cls, value: str) -> str:
+        return value.strip()

@@ -5,7 +5,6 @@ import httpx
 
 from .config import Settings
 
-
 TRANSIENT = {429, 500, 502, 503, 504}
 
 
@@ -23,10 +22,14 @@ class FactiverseClient:
 
     async def _post(self, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
         last_error = "Unknown API failure"
-        async with httpx.AsyncClient(timeout=self.settings.request_timeout_seconds) as client:
+        async with httpx.AsyncClient(
+            timeout=self.settings.request_timeout_seconds
+        ) as client:
             for attempt in range(3):
                 try:
-                    response = await client.post(endpoint, headers=self.headers, json=payload)
+                    response = await client.post(
+                        endpoint, headers=self.headers, json=payload
+                    )
                     if response.status_code in TRANSIENT and attempt < 2:
                         await asyncio.sleep(2**attempt)
                         continue

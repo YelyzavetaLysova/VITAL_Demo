@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "VITAL \u2014 MediaFutures",
+  "description": "Find claims, inspect evidence and analyse article context.",
+  "version": "0.6.0",
+  "icons": {
+    "128": "assets/mf-logo.png"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8765/*",
+    "http://localhost:8765/*"
+  ],
+  "background": {
+    "scripts": [
+      "safari-background.js"
+    ]
+  },
+  "action": {
+    "default_title": "Open VITAL",
+    "default_popup": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "browser-api.js",
+        "content-script.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "sidepanel.html",
+        "sidepanel.js",
+        "browser-api.js",
+        "sidepanel.css",
+        "assets/*"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}

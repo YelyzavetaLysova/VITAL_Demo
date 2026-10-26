@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>VITAL powered by factiverse</title>
+    <link rel="stylesheet" href="/assets/demo.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand" aria-label="VITAL home">
+        <img
+          class="logo-light"
+          src="/assets/mf-mainlogo-black.png"
+          alt="MediaFutures"
+        /><img
+          class="logo-dark"
+          src="/assets/mf-mainlogo-white.png"
+          alt="MediaFutures"
+        />
+        <span>VITAL <small>powered by factiverse</small></span>
+      </a>
+    </header>
+    <main id="catalogue" class="catalogue">
+      <div class="catalogue-heading">
+        <h1>News</h1>
+        <p>Selected stories</p>
+      </div>
+      <form id="addArticleForm" class="add-article-form">
+        <label for="addArticleUrl">Add an article</label>
+        <div class="url-row">
+          <input
+            id="addArticleUrl"
+            type="url"
+            placeholder="https://..."
+            required
+            maxlength="3000"
+          /><button class="primary" type="submit">Add and analyse</button>
+        </div>
+        <p id="addArticleMessage" class="small" role="status"></p>
+      </form>
+      <p id="catalogueMessage" role="status">Loading articles.</p>
+      <div id="stories" class="stories"></div>
+      <p class="catalogue-note">
+        Articles are snapshots selected by the organizers. Publication and
+        analysis dates are shown separately.
+      </p>
+    </main>
+    <main id="reader" class="reader" hidden>
+      <div class="article-column">
+        <a href="/" class="back-link">← All stories</a>
+        <article id="articleContent">
+          <p id="publisher" class="eyebrow"></p>
+          <h1 id="headline"></h1>
+          <p id="byline" class="byline"></p>
+          <a id="sourceLink" target="_blank" rel="noopener noreferrer"
+            >Read the original ↗</a
+          >
+          <figure id="hero" hidden><img id="heroImage" alt="" /></figure>
+          <div id="articleBody" class="article-body"></div>
+        </article>
+      </div>
+      <aside id="widget" class="widget" aria-label="VITAL claim evidence">
+        <div class="widget-heading">
+          <div class="brand">
+            <img
+              class="logo-light"
+              src="/assets/mf-mainlogo-black.png"
+              alt="MediaFutures"
+            /><img
+              class="logo-dark"
+              src="/assets/mf-mainlogo-white.png"
+              alt="MediaFutures"
+            /><span>VITAL <small>powered by factiverse</small></span>
+          </div>
+          <button
+            id="closeWidget"
+            class="icon-button"
+            aria-label="Close VITAL"
+            title="Close VITAL"
+            type="button"
+            aria-keyshortcuts="Escape"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M6 6l12 12M18 6L6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <nav class="widget-tabs" aria-label="Evidence sections">
+          <button data-view="summary" aria-selected="true">Summary</button>
+          <button data-view="claims" aria-selected="false">
+            Claims <span id="claimCount"></span>
+          </button>
+          <button data-view="article" aria-selected="false">Article</button>
+          <button data-view="settings" aria-selected="false">Settings</button>
+        </nav>
+        <div class="widget-scroll">
+          <p id="cacheNote" class="cache-note" hidden></p>
+          <div
+            id="progress"
+            class="progress"
+            hidden
+            role="status"
+            aria-live="polite"
+          >
+            <span class="spinner"></span><span id="progressText"></span>
+          </div>
+          <p id="errorMessage" class="error-message" hidden role="alert"></p>
+          <div id="analyseIntro">
+            <h2>Check the claims</h2>
+            <button id="analyse" class="primary">Analyse</button>
+            <p class="small muted">
+              Article text is sent for automated analysis.
+            </p>
+          </div>
+          <section data-panel="summary">
+            <div id="summaryInsights"></div>
+          </section>
+          <section data-panel="claims" hidden>
+            <details id="addClaim" class="note-details add-claim">
+              <summary>Add a claim</summary>
+              <p>Select a passage in the article, then bring it here.</p>
+              <button id="useSelection">Use selected text</button>
+              <form id="manualForm">
+                <label for="claimText">Selected claim</label>
+                <textarea
+                  id="claimText"
+                  rows="4"
+                  minlength="12"
+                  required
+                  readonly
+                ></textarea>
+                <button class="primary" type="submit">Add claim</button>
+                <p id="manualMessage" class="small" role="status"></p>
+              </form>
+            </details>
+
+            <p id="claimScope" class="small muted" hidden></p>
+            <div id="claimCards"></div>
+            <div id="detectionFeedback"></div>
+            <p id="noClaims" class="muted" hidden>
+              No checkable claims were found.
+            </p>
+            <details id="analysisNotes" class="note-details" hidden>
+              <summary>Analysis notes</summary>
+              <div id="notesText"></div>
+            </details>
+          </section>
+          <section data-panel="article" hidden>
+            <div id="sourceInsights"></div>
+            <h2>Article context</h2>
+            <div id="articleInsights">
+              <p class="muted">Available after analysis.</p>
+            </div>
+          </section>
+          <section data-panel="settings" hidden>
+            <h2>Appearance</h2>
+            <label for="theme">Theme</label
+            ><select id="theme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </section>
+          <details class="note-details colour-guide">
+            <summary>Colours and results</summary>
+            <p>
+              Underlined: detected. Pulsing grey: checking. Grey: insufficient
+              evidence. Green: supported. Red: contradicted. Amber: mixed
+              evidence or context needed. Check failed: see the claim details.
+            </p>
+          </details>
+          <p class="disclaimer">
+            Automated assessments can be wrong. Check the sources. Not medical
+            advice.
+          </p>
+        </div>
+      </aside>
+      <button id="openWidget" class="mobile-launcher">
+        VITAL · Open evidence
+      </button>
+    </main>
+    <script src="/assets/mention-navigation.js"></script>
+    <script src="/assets/widget-overview.js"></script>
+    <script src="/assets/demo.js"></script>
+  </body>
+</html>

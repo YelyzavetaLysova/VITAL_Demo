@@ -1,0 +1,7 @@
+backend/.env
+backend/.venv/
+backend/data/*.sqlite3*
+backend/data/media/
+__pycache__/
+.pytest_cache/
+node_modules/

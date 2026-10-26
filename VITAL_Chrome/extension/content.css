@@ -1,0 +1,66 @@
+mark.vital-claim-highlight {
+  color: inherit;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+mark.vital-claim-highlight[data-vital-status="checking"],
+mark.vital-claim-highlight[data-vital-status="insufficient"] {
+  background: #747e8a25;
+}
+mark.vital-claim-highlight[data-vital-status="checking"] {
+  animation: vital-pulse 1.4s ease-in-out infinite;
+}
+mark.vital-claim-highlight[data-vital-status="supported"] {
+  background: #16856c30;
+  text-decoration-color: #16856c;
+}
+mark.vital-claim-highlight[data-vital-status="supported"]::after {
+  content: none;
+  color: #16856c;
+}
+mark.vital-claim-highlight[data-vital-status="contradicted"] {
+  background: #d94b4b30;
+  text-decoration-color: #d94b4b;
+}
+mark.vital-claim-highlight[data-vital-status="contradicted"]::after {
+  content: none;
+  color: #d94b4b;
+}
+mark.vital-claim-highlight[data-vital-status="mixed"],
+mark.vital-claim-highlight[data-vital-status="context_needed"] {
+  background: #d8881530;
+}
+mark.vital-claim-highlight[data-vital-status="mixed"]::after,
+mark.vital-claim-highlight[data-vital-status="context_needed"]::after {
+  content: none;
+}
+mark.vital-claim-highlight[data-vital-status="error"]::after {
+  content: none;
+}
+mark.vital-focused {
+  outline: 2px solid #17695d;
+  outline-offset: 3px;
+}
+@keyframes vital-pulse {
+  50% {
+    background: #747e8a55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  mark.vital-claim-highlight {
+    animation: none !important;
+  }
+}
+
+::highlight(vital-mention) {
+  background: #ffe08a;
+  color: #161b19;
+}
+
+mark.vital-claim-highlight::after {
+  content: none !important;
+}
+
+.insight dd { white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -1,0 +1,985 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07915E1F308F4D1500ADEA6F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E1E308F4D1500ADEA6F /* AppDelegate.swift */; };
+		07915E21308F4D1500ADEA6F /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E20308F4D1500ADEA6F /* SceneDelegate.swift */; };
+		07915E24308F4D1500ADEA6F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07915E22308F4D1500ADEA6F /* LaunchScreen.storyboard */; };
+		07915E27308F4D1500ADEA6F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07915E25308F4D1500ADEA6F /* Main.storyboard */; };
+		07915E30308F4D1500ADEA6F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E2F308F4D1500ADEA6F /* AppDelegate.swift */; };
+		07915E33308F4D1500ADEA6F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07915E31308F4D1500ADEA6F /* Main.storyboard */; };
+		07915E3A308F4D1500ADEA6F /* VITAL Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 07915E39308F4D1500ADEA6F /* VITAL Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		07915E44308F4D1500ADEA6F /* VITAL Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 07915E43308F4D1500ADEA6F /* VITAL Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		07915E49308F4D1500ADEA6F /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 07915E0E308F4D1400ADEA6F /* Main.html */; };
+		07915E4A308F4D1500ADEA6F /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 07915E0E308F4D1400ADEA6F /* Main.html */; };
+		07915E4B308F4D1500ADEA6F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 07915E10308F4D1400ADEA6F /* Icon.png */; };
+		07915E4C308F4D1500ADEA6F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 07915E10308F4D1400ADEA6F /* Icon.png */; };
+		07915E4D308F4D1500ADEA6F /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 07915E11308F4D1400ADEA6F /* Style.css */; };
+		07915E4E308F4D1500ADEA6F /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 07915E11308F4D1400ADEA6F /* Style.css */; };
+		07915E4F308F4D1500ADEA6F /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E12308F4D1400ADEA6F /* Script.js */; };
+		07915E50308F4D1500ADEA6F /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E12308F4D1400ADEA6F /* Script.js */; };
+		07915E51308F4D1500ADEA6F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E13308F4D1400ADEA6F /* ViewController.swift */; };
+		07915E52308F4D1500ADEA6F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E13308F4D1400ADEA6F /* ViewController.swift */; };
+		07915E53308F4D1500ADEA6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 07915E14308F4D1500ADEA6F /* Assets.xcassets */; };
+		07915E54308F4D1500ADEA6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 07915E14308F4D1500ADEA6F /* Assets.xcassets */; };
+		07915E55308F4D1500ADEA6F /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E16308F4D1500ADEA6F /* SafariWebExtensionHandler.swift */; };
+		07915E56308F4D1500ADEA6F /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07915E16308F4D1500ADEA6F /* SafariWebExtensionHandler.swift */; };
+		07915E74308F4D1500ADEA6F /* sidepanel.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E68308F4D1500ADEA6F /* sidepanel.js */; };
+		07915E75308F4D1500ADEA6F /* content.css in Resources */ = {isa = PBXBuildFile; fileRef = 07915E69308F4D1500ADEA6F /* content.css */; };
+		07915E76308F4D1500ADEA6F /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6A308F4D1500ADEA6F /* background.js */; };
+		07915E77308F4D1500ADEA6F /* sidepanel.css in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6B308F4D1500ADEA6F /* sidepanel.css */; };
+		07915E78308F4D1500ADEA6F /* config.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6C308F4D1500ADEA6F /* config.js */; };
+		07915E79308F4D1500ADEA6F /* mention-navigation.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6D308F4D1500ADEA6F /* mention-navigation.js */; };
+		07915E7A308F4D1500ADEA6F /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6E308F4D1500ADEA6F /* manifest.json */; };
+		07915E7B308F4D1500ADEA6F /* widget-overview.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6F308F4D1500ADEA6F /* widget-overview.js */; };
+		07915E7C308F4D1500ADEA6F /* content-script.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E70308F4D1500ADEA6F /* content-script.js */; };
+		07915E7D308F4D1500ADEA6F /* sidepanel.html in Resources */ = {isa = PBXBuildFile; fileRef = 07915E71308F4D1500ADEA6F /* sidepanel.html */; };
+		07915E7E308F4D1500ADEA6F /* widget-bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E72308F4D1500ADEA6F /* widget-bridge.js */; };
+		07915E7F308F4D1500ADEA6F /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 07915E73308F4D1500ADEA6F /* assets */; };
+		07915E80308F4D1500ADEA6F /* sidepanel.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E68308F4D1500ADEA6F /* sidepanel.js */; };
+		07915E81308F4D1500ADEA6F /* content.css in Resources */ = {isa = PBXBuildFile; fileRef = 07915E69308F4D1500ADEA6F /* content.css */; };
+		07915E82308F4D1500ADEA6F /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6A308F4D1500ADEA6F /* background.js */; };
+		07915E83308F4D1500ADEA6F /* sidepanel.css in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6B308F4D1500ADEA6F /* sidepanel.css */; };
+		07915E84308F4D1500ADEA6F /* config.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6C308F4D1500ADEA6F /* config.js */; };
+		07915E85308F4D1500ADEA6F /* mention-navigation.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6D308F4D1500ADEA6F /* mention-navigation.js */; };
+		07915E86308F4D1500ADEA6F /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6E308F4D1500ADEA6F /* manifest.json */; };
+		07915E87308F4D1500ADEA6F /* widget-overview.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E6F308F4D1500ADEA6F /* widget-overview.js */; };
+		07915E88308F4D1500ADEA6F /* content-script.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E70308F4D1500ADEA6F /* content-script.js */; };
+		07915E89308F4D1500ADEA6F /* sidepanel.html in Resources */ = {isa = PBXBuildFile; fileRef = 07915E71308F4D1500ADEA6F /* sidepanel.html */; };
+		07915E8A308F4D1500ADEA6F /* widget-bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = 07915E72308F4D1500ADEA6F /* widget-bridge.js */; };
+		07915E8B308F4D1500ADEA6F /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 07915E73308F4D1500ADEA6F /* assets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		07915E3B308F4D1500ADEA6F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 07915E08308F4D1400ADEA6F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07915E38308F4D1500ADEA6F;
+			remoteInfo = "VITAL Extension (iOS)";
+		};
+		07915E45308F4D1500ADEA6F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 07915E08308F4D1400ADEA6F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07915E42308F4D1500ADEA6F;
+			remoteInfo = "VITAL Extension (macOS)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		07915E5C308F4D1500ADEA6F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				07915E3A308F4D1500ADEA6F /* VITAL Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+		07915E63308F4D1500ADEA6F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				07915E44308F4D1500ADEA6F /* VITAL Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		07915E0F308F4D1400ADEA6F /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		07915E10308F4D1400ADEA6F /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		07915E11308F4D1400ADEA6F /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		07915E12308F4D1400ADEA6F /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		07915E13308F4D1400ADEA6F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		07915E14308F4D1500ADEA6F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		07915E16308F4D1500ADEA6F /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		07915E1B308F4D1500ADEA6F /* VITAL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VITAL.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		07915E1E308F4D1500ADEA6F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		07915E20308F4D1500ADEA6F /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		07915E23308F4D1500ADEA6F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		07915E26308F4D1500ADEA6F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		07915E28308F4D1500ADEA6F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		07915E2D308F4D1500ADEA6F /* VITAL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VITAL.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		07915E2F308F4D1500ADEA6F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		07915E32308F4D1500ADEA6F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		07915E34308F4D1500ADEA6F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		07915E39308F4D1500ADEA6F /* VITAL Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "VITAL Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		07915E3E308F4D1500ADEA6F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		07915E43308F4D1500ADEA6F /* VITAL Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "VITAL Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		07915E48308F4D1500ADEA6F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		07915E68308F4D1500ADEA6F /* sidepanel.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = sidepanel.js; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/sidepanel.js"; sourceTree = "<absolute>"; };
+		07915E69308F4D1500ADEA6F /* content.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content.css; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/content.css"; sourceTree = "<absolute>"; };
+		07915E6A308F4D1500ADEA6F /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/background.js"; sourceTree = "<absolute>"; };
+		07915E6B308F4D1500ADEA6F /* sidepanel.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = sidepanel.css; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/sidepanel.css"; sourceTree = "<absolute>"; };
+		07915E6C308F4D1500ADEA6F /* config.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = config.js; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/config.js"; sourceTree = "<absolute>"; };
+		07915E6D308F4D1500ADEA6F /* mention-navigation.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "mention-navigation.js"; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/mention-navigation.js"; sourceTree = "<absolute>"; };
+		07915E6E308F4D1500ADEA6F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/manifest.json"; sourceTree = "<absolute>"; };
+		07915E6F308F4D1500ADEA6F /* widget-overview.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "widget-overview.js"; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/widget-overview.js"; sourceTree = "<absolute>"; };
+		07915E70308F4D1500ADEA6F /* content-script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "content-script.js"; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/content-script.js"; sourceTree = "<absolute>"; };
+		07915E71308F4D1500ADEA6F /* sidepanel.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = sidepanel.html; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/sidepanel.html"; sourceTree = "<absolute>"; };
+		07915E72308F4D1500ADEA6F /* widget-bridge.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "widget-bridge.js"; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/widget-bridge.js"; sourceTree = "<absolute>"; };
+		07915E73308F4D1500ADEA6F /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = "/Users/yelyzavetalysova/Documents/GitHub/VITAL_Demo/VITAL_Safari_popup/extension-safari/assets"; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		07915E18308F4D1500ADEA6F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		07915E2A308F4D1500ADEA6F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		07915E36308F4D1500ADEA6F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		07915E40308F4D1500ADEA6F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07915E07308F4D1400ADEA6F = {
+			isa = PBXGroup;
+			children = (
+				07915E0C308F4D1400ADEA6F /* Shared (App) */,
+				07915E15308F4D1500ADEA6F /* Shared (Extension) */,
+				07915E1D308F4D1500ADEA6F /* iOS (App) */,
+				07915E2E308F4D1500ADEA6F /* macOS (App) */,
+				07915E3D308F4D1500ADEA6F /* iOS (Extension) */,
+				07915E47308F4D1500ADEA6F /* macOS (Extension) */,
+				07915E1C308F4D1500ADEA6F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		07915E0C308F4D1400ADEA6F /* Shared (App) */ = {
+			isa = PBXGroup;
+			children = (
+				07915E13308F4D1400ADEA6F /* ViewController.swift */,
+				07915E14308F4D1500ADEA6F /* Assets.xcassets */,
+				07915E0D308F4D1400ADEA6F /* Resources */,
+			);
+			path = "Shared (App)";
+			sourceTree = "<group>";
+		};
+		07915E0D308F4D1400ADEA6F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				07915E0E308F4D1400ADEA6F /* Main.html */,
+				07915E10308F4D1400ADEA6F /* Icon.png */,
+				07915E11308F4D1400ADEA6F /* Style.css */,
+				07915E12308F4D1400ADEA6F /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		07915E15308F4D1500ADEA6F /* Shared (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				07915E67308F4D1500ADEA6F /* Resources */,
+				07915E16308F4D1500ADEA6F /* SafariWebExtensionHandler.swift */,
+			);
+			path = "Shared (Extension)";
+			sourceTree = "<group>";
+		};
+		07915E1C308F4D1500ADEA6F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				07915E1B308F4D1500ADEA6F /* VITAL.app */,
+				07915E2D308F4D1500ADEA6F /* VITAL.app */,
+				07915E39308F4D1500ADEA6F /* VITAL Extension.appex */,
+				07915E43308F4D1500ADEA6F /* VITAL Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		07915E1D308F4D1500ADEA6F /* iOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				07915E1E308F4D1500ADEA6F /* AppDelegate.swift */,
+				07915E20308F4D1500ADEA6F /* SceneDelegate.swift */,
+				07915E22308F4D1500ADEA6F /* LaunchScreen.storyboard */,
+				07915E25308F4D1500ADEA6F /* Main.storyboard */,
+				07915E28308F4D1500ADEA6F /* Info.plist */,
+			);
+			path = "iOS (App)";
+			sourceTree = "<group>";
+		};
+		07915E2E308F4D1500ADEA6F /* macOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				07915E2F308F4D1500ADEA6F /* AppDelegate.swift */,
+				07915E31308F4D1500ADEA6F /* Main.storyboard */,
+				07915E34308F4D1500ADEA6F /* Info.plist */,
+			);
+			path = "macOS (App)";
+			sourceTree = "<group>";
+		};
+		07915E3D308F4D1500ADEA6F /* iOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				07915E3E308F4D1500ADEA6F /* Info.plist */,
+			);
+			path = "iOS (Extension)";
+			sourceTree = "<group>";
+		};
+		07915E47308F4D1500ADEA6F /* macOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				07915E48308F4D1500ADEA6F /* Info.plist */,
+			);
+			path = "macOS (Extension)";
+			sourceTree = "<group>";
+		};
+		07915E67308F4D1500ADEA6F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				07915E68308F4D1500ADEA6F /* sidepanel.js */,
+				07915E69308F4D1500ADEA6F /* content.css */,
+				07915E6A308F4D1500ADEA6F /* background.js */,
+				07915E6B308F4D1500ADEA6F /* sidepanel.css */,
+				07915E6C308F4D1500ADEA6F /* config.js */,
+				07915E6D308F4D1500ADEA6F /* mention-navigation.js */,
+				07915E6E308F4D1500ADEA6F /* manifest.json */,
+				07915E6F308F4D1500ADEA6F /* widget-overview.js */,
+				07915E70308F4D1500ADEA6F /* content-script.js */,
+				07915E71308F4D1500ADEA6F /* sidepanel.html */,
+				07915E72308F4D1500ADEA6F /* widget-bridge.js */,
+				07915E73308F4D1500ADEA6F /* assets */,
+			);
+			name = Resources;
+			path = "Shared (Extension)";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		07915E1A308F4D1500ADEA6F /* VITAL (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07915E5D308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL (iOS)" */;
+			buildPhases = (
+				07915E17308F4D1500ADEA6F /* Sources */,
+				07915E18308F4D1500ADEA6F /* Frameworks */,
+				07915E19308F4D1500ADEA6F /* Resources */,
+				07915E5C308F4D1500ADEA6F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				07915E3C308F4D1500ADEA6F /* PBXTargetDependency */,
+			);
+			name = "VITAL (iOS)";
+			productName = "VITAL (iOS)";
+			productReference = 07915E1B308F4D1500ADEA6F /* VITAL.app */;
+			productType = "com.apple.product-type.application";
+		};
+		07915E2C308F4D1500ADEA6F /* VITAL (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07915E64308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL (macOS)" */;
+			buildPhases = (
+				07915E29308F4D1500ADEA6F /* Sources */,
+				07915E2A308F4D1500ADEA6F /* Frameworks */,
+				07915E2B308F4D1500ADEA6F /* Resources */,
+				07915E63308F4D1500ADEA6F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				07915E46308F4D1500ADEA6F /* PBXTargetDependency */,
+			);
+			name = "VITAL (macOS)";
+			productName = "VITAL (macOS)";
+			productReference = 07915E2D308F4D1500ADEA6F /* VITAL.app */;
+			productType = "com.apple.product-type.application";
+		};
+		07915E38308F4D1500ADEA6F /* VITAL Extension (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07915E59308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL Extension (iOS)" */;
+			buildPhases = (
+				07915E35308F4D1500ADEA6F /* Sources */,
+				07915E36308F4D1500ADEA6F /* Frameworks */,
+				07915E37308F4D1500ADEA6F /* Resources */,
+			);
+			buildRules = (
+			);
+			name = "VITAL Extension (iOS)";
+			productName = "VITAL Extension (iOS)";
+			productReference = 07915E39308F4D1500ADEA6F /* VITAL Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		07915E42308F4D1500ADEA6F /* VITAL Extension (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07915E60308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL Extension (macOS)" */;
+			buildPhases = (
+				07915E3F308F4D1500ADEA6F /* Sources */,
+				07915E40308F4D1500ADEA6F /* Frameworks */,
+				07915E41308F4D1500ADEA6F /* Resources */,
+			);
+			buildRules = (
+			);
+			name = "VITAL Extension (macOS)";
+			productName = "VITAL Extension (macOS)";
+			productReference = 07915E43308F4D1500ADEA6F /* VITAL Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		07915E08308F4D1400ADEA6F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					07915E1A308F4D1500ADEA6F = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					07915E2C308F4D1500ADEA6F = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					07915E38308F4D1500ADEA6F = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					07915E42308F4D1500ADEA6F = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = 07915E0B308F4D1400ADEA6F /* Build configuration list for PBXProject "VITAL" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 07915E07308F4D1400ADEA6F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 07915E1C308F4D1500ADEA6F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				07915E1A308F4D1500ADEA6F /* VITAL (iOS) */,
+				07915E2C308F4D1500ADEA6F /* VITAL (macOS) */,
+				07915E38308F4D1500ADEA6F /* VITAL Extension (iOS) */,
+				07915E42308F4D1500ADEA6F /* VITAL Extension (macOS) */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		07915E19308F4D1500ADEA6F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				07915E4B308F4D1500ADEA6F /* Icon.png in Resources */,
+				07915E24308F4D1500ADEA6F /* LaunchScreen.storyboard in Resources */,
+				07915E49308F4D1500ADEA6F /* Main.html in Resources */,
+				07915E4F308F4D1500ADEA6F /* Script.js in Resources */,
+				07915E53308F4D1500ADEA6F /* Assets.xcassets in Resources */,
+				07915E27308F4D1500ADEA6F /* Main.storyboard in Resources */,
+				07915E4D308F4D1500ADEA6F /* Style.css in Resources */,
+			);
+		};
+		07915E2B308F4D1500ADEA6F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				07915E4C308F4D1500ADEA6F /* Icon.png in Resources */,
+				07915E4E308F4D1500ADEA6F /* Style.css in Resources */,
+				07915E33308F4D1500ADEA6F /* Main.storyboard in Resources */,
+				07915E50308F4D1500ADEA6F /* Script.js in Resources */,
+				07915E54308F4D1500ADEA6F /* Assets.xcassets in Resources */,
+				07915E4A308F4D1500ADEA6F /* Main.html in Resources */,
+			);
+		};
+		07915E37308F4D1500ADEA6F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				07915E8A308F4D1500ADEA6F /* widget-bridge.js in Resources */,
+				07915E80308F4D1500ADEA6F /* sidepanel.js in Resources */,
+				07915E86308F4D1500ADEA6F /* manifest.json in Resources */,
+				07915E85308F4D1500ADEA6F /* mention-navigation.js in Resources */,
+				07915E83308F4D1500ADEA6F /* sidepanel.css in Resources */,
+				07915E82308F4D1500ADEA6F /* background.js in Resources */,
+				07915E88308F4D1500ADEA6F /* content-script.js in Resources */,
+				07915E87308F4D1500ADEA6F /* widget-overview.js in Resources */,
+				07915E84308F4D1500ADEA6F /* config.js in Resources */,
+				07915E8B308F4D1500ADEA6F /* assets in Resources */,
+				07915E89308F4D1500ADEA6F /* sidepanel.html in Resources */,
+				07915E81308F4D1500ADEA6F /* content.css in Resources */,
+			);
+		};
+		07915E41308F4D1500ADEA6F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				07915E7E308F4D1500ADEA6F /* widget-bridge.js in Resources */,
+				07915E74308F4D1500ADEA6F /* sidepanel.js in Resources */,
+				07915E7A308F4D1500ADEA6F /* manifest.json in Resources */,
+				07915E79308F4D1500ADEA6F /* mention-navigation.js in Resources */,
+				07915E77308F4D1500ADEA6F /* sidepanel.css in Resources */,
+				07915E76308F4D1500ADEA6F /* background.js in Resources */,
+				07915E7C308F4D1500ADEA6F /* content-script.js in Resources */,
+				07915E7B308F4D1500ADEA6F /* widget-overview.js in Resources */,
+				07915E78308F4D1500ADEA6F /* config.js in Resources */,
+				07915E7F308F4D1500ADEA6F /* assets in Resources */,
+				07915E7D308F4D1500ADEA6F /* sidepanel.html in Resources */,
+				07915E75308F4D1500ADEA6F /* content.css in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		07915E17308F4D1500ADEA6F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				07915E51308F4D1500ADEA6F /* ViewController.swift in Sources */,
+				07915E1F308F4D1500ADEA6F /* AppDelegate.swift in Sources */,
+				07915E21308F4D1500ADEA6F /* SceneDelegate.swift in Sources */,
+			);
+		};
+		07915E29308F4D1500ADEA6F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				07915E52308F4D1500ADEA6F /* ViewController.swift in Sources */,
+				07915E30308F4D1500ADEA6F /* AppDelegate.swift in Sources */,
+			);
+		};
+		07915E35308F4D1500ADEA6F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				07915E55308F4D1500ADEA6F /* SafariWebExtensionHandler.swift in Sources */,
+			);
+		};
+		07915E3F308F4D1500ADEA6F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				07915E56308F4D1500ADEA6F /* SafariWebExtensionHandler.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		07915E3C308F4D1500ADEA6F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07915E38308F4D1500ADEA6F /* VITAL Extension (iOS) */;
+			targetProxy = 07915E3B308F4D1500ADEA6F /* PBXContainerItemProxy */;
+		};
+		07915E46308F4D1500ADEA6F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07915E42308F4D1500ADEA6F /* VITAL Extension (macOS) */;
+			targetProxy = 07915E45308F4D1500ADEA6F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		07915E0E308F4D1400ADEA6F /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				07915E0F308F4D1400ADEA6F /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		07915E22308F4D1500ADEA6F /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				07915E23308F4D1500ADEA6F /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		07915E25308F4D1500ADEA6F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				07915E26308F4D1500ADEA6F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		07915E31308F4D1500ADEA6F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				07915E32308F4D1500ADEA6F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		07915E57308F4D1500ADEA6F /* Debug configuration for PBXProject "VITAL" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		07915E58308F4D1500ADEA6F /* Release configuration for PBXProject "VITAL" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		07915E5A308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL Extension (iOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "VITAL Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL.Extension;
+				PRODUCT_NAME = "VITAL Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		07915E5B308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL Extension (iOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "VITAL Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL.Extension;
+				PRODUCT_NAME = "VITAL Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		07915E5E308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL (iOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = VITAL;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL;
+				PRODUCT_NAME = VITAL;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		07915E5F308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL (iOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = VITAL;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL;
+				PRODUCT_NAME = VITAL;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		07915E61308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL Extension (macOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "VITAL Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL.Extension;
+				PRODUCT_NAME = "VITAL Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		07915E62308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL Extension (macOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "VITAL Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL.Extension;
+				PRODUCT_NAME = "VITAL Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		07915E65308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL (macOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = VITAL;
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL;
+				PRODUCT_NAME = VITAL;
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		07915E66308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL (macOS)" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = VITAL;
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourCompany.VITAL;
+				PRODUCT_NAME = VITAL;
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		07915E0B308F4D1400ADEA6F /* Build configuration list for PBXProject "VITAL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07915E57308F4D1500ADEA6F /* Debug configuration for PBXProject "VITAL" */,
+				07915E58308F4D1500ADEA6F /* Release configuration for PBXProject "VITAL" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		07915E59308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL Extension (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07915E5A308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL Extension (iOS)" */,
+				07915E5B308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL Extension (iOS)" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		07915E5D308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07915E5E308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL (iOS)" */,
+				07915E5F308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL (iOS)" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		07915E60308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL Extension (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07915E61308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL Extension (macOS)" */,
+				07915E62308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL Extension (macOS)" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		07915E64308F4D1500ADEA6F /* Build configuration list for PBXNativeTarget "VITAL (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07915E65308F4D1500ADEA6F /* Debug configuration for PBXNativeTarget "VITAL (macOS)" */,
+				07915E66308F4D1500ADEA6F /* Release configuration for PBXNativeTarget "VITAL (macOS)" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 07915E08308F4D1400ADEA6F /* Project object */;
+	validationLevel = 1;
+}

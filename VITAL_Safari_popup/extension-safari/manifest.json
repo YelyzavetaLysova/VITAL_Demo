@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "VITAL by MediaFutures",
+  "version": "1.11.1",
+  "description": "Inspect article claims and context.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://vital.demo.mediafutures.no/*"
+  ],
+  "action": {
+    "default_title": "Open VITAL",
+    "default_popup": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "mention-navigation.js",
+        "content-script.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "128": "assets/mf-mainlogo-black.png"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  }
+}

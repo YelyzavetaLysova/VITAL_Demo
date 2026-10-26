@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Organizers · VITAL</title>
+    <link rel="stylesheet" href="/assets/demo.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand"
+        ><img src="/assets/mf-mainlogo-black.png" alt="MediaFutures" /><span
+          >VITAL <small>by MediaFutures</small></span
+        ></a
+      ><a href="/">Visitor page ↗</a>
+    </header>
+    <main class="admin-layout">
+      <section id="loginPanel" class="admin-card narrow">
+        <p class="eyebrow">ORGANIZERS</p>
+        <h1>Sign in</h1>
+        <form id="loginForm">
+          <label for="password">Password</label
+          ><input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          /><button class="primary">Sign in</button>
+          <p id="loginMessage" role="status"></p>
+        </form>
+      </section>
+      <div id="adminWorkspace" hidden>
+        <div class="admin-heading">
+          <div>
+            <p class="eyebrow">ORGANIZERS</p>
+            <h1>Article collection</h1>
+          </div>
+          <button id="logout">Sign out</button>
+        </div>
+        <p>
+          Import and review a snapshot. Save it to the front page, then analyse
+          it or let visitors start a new analysis.
+        </p>
+        <section class="admin-card">
+          <h2>Share the demo</h2>
+          <label for="shareUrl">Visitor URL</label
+          ><input id="shareUrl" type="url" />
+          <p class="small muted">
+            Use the hosted address or your Mac's Wi-Fi address. localhost and
+            127.0.0.1 cannot open the Mac demo on a phone.
+          </p>
+          <div class="actions">
+            <button id="copyLink">Copy link</button
+            ><button id="downloadQr">Download QR code</button>
+          </div>
+          <p id="shareMessage" class="small" role="status"></p>
+        </section>
+        <section class="admin-card">
+          <h2>Add an article</h2>
+          <form id="importForm" class="import-form">
+            <label for="importUrl">Article URL</label>
+            <div>
+              <input
+                id="importUrl"
+                type="url"
+                placeholder="https://..."
+                required
+              /><button class="primary">Import</button>
+            </div>
+          </form>
+          <button id="newManual" class="text-button">
+            Enter article manually
+          </button>
+          <p id="importMessage" role="status"></p>
+        </section>
+        <section id="editor" class="admin-card" hidden>
+          <h2>Review the article</h2>
+          <p class="small muted">
+            Check the imported text and attribution. Saving text changes clears
+            previous analysis results.
+          </p>
+          <form id="articleForm">
+            <label for="editTitle">Headline</label
+            ><input id="editTitle" required maxlength="1000" />
+            <div class="form-grid">
+              <div>
+                <label for="editPublisher">Publisher</label
+                ><input id="editPublisher" maxlength="200" />
+              </div>
+              <div>
+                <label for="editAuthor">Author</label
+                ><input id="editAuthor" maxlength="500" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label for="editDate"
+                  >Publication date, as provided by the source</label
+                ><input id="editDate" placeholder="Leave empty if unknown" />
+              </div>
+              <div>
+                <label for="editLanguage">Language</label
+                ><input id="editLanguage" value="en" />
+              </div>
+            </div>
+            <label for="editCountry">Country code</label
+            ><input id="editCountry" value="NO" minlength="2" maxlength="5" />
+            <label for="editUrl">Original article URL</label
+            ><input id="editUrl" type="url" />
+            <label for="editText">Article text</label
+            ><textarea
+              id="editText"
+              rows="14"
+              minlength="12"
+              maxlength="120000"
+              required
+            ></textarea>
+            <div class="form-grid">
+              <div>
+                <label for="editTheme">Theme</label
+                ><select id="editTheme">
+                  <option value="health">Health</option>
+                  <option value="politics">Politics</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label for="editImage">Image · optional</label
+                ><input
+                  id="editImage"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                />
+              </div>
+            </div>
+            <img
+              id="imagePreview"
+              class="image-preview"
+              alt="Imported article image"
+              hidden
+            />
+            <button id="removeImage" type="button" class="text-button">
+              Remove image
+            </button>
+            <div class="actions">
+              <button class="primary" type="submit">Save article</button
+              ><button id="cancelEdit" type="button">Cancel</button>
+            </div>
+            <p id="saveMessage" role="status"></p>
+          </form>
+        </section>
+        <section class="admin-card">
+          <h2>Saved articles</h2>
+          <p id="adminMessage" role="status"></p>
+          <button id="exportFeedback" type="button">Download feedback</button>
+          <div id="adminArticles"></div>
+        </section>
+      </div>
+    </main>
+    <dialog id="responseDialog">
+      <h2>Saved VITAL response</h2>
+      <p class="small muted">
+        Useful for checking the result format during integration.
+      </p>
+      <pre id="serverResponse"></pre>
+      <button id="closeResponse">Close</button>
+    </dialog>
+    <script src="/assets/admin.js"></script>
+  </body>
+</html>

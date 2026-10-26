@@ -1,0 +1,13 @@
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+httpx==0.28.1
+pydantic-settings==2.10.1
+cachetools==6.1.0
+pytest==8.4.1
+pytest-asyncio==1.1.0
+beautifulsoup4==4.13.4
+Pillow>=11.0,<13
+python-multipart>=0.0.20,<1
+qrcode>=8.0,<9
+
+trafilatura>=2.0,<3

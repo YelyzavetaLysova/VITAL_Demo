@@ -1,0 +1,102 @@
+{
+  "status": "partial",
+  "claim_result": {
+    "rawResponses": [
+      {
+        "response": {
+          "_id": null,
+          "collection": null,
+          "detectedClaims": [
+            {
+              "_id": "6acccbd0e9b2dc05380ccfda",
+              "claim": "The Earth orbits the Sun.",
+              "score": 0.8679061532020569,
+              "collection": "detected_claims",
+              "resolved_claim": null,
+              "checkworthiness_score": 1
+            },
+            {
+              "_id": "6acccbd0e9b2dc05380ccfdb",
+              "claim": "The Moon reflects sunlight.",
+              "score": 0.9197363257408142,
+              "collection": "detected_claims",
+              "resolved_claim": null,
+              "checkworthiness_score": 1
+            }
+          ]
+        },
+        "chunkIndex": 0,
+        "claimsField": "detectedClaims"
+      }
+    ],
+    "stanceResults": [],
+    "classification": {
+      "claims": [
+        {
+          "reason": "Astronomy proposition with no health, medical, safety, or biomedical relevance.",
+          "accepted": false,
+          "category": "Unrelated",
+          "candidate_index": 0
+        },
+        {
+          "reason": "Astronomy proposition with no health, medical, safety, or biomedical relevance.",
+          "accepted": false,
+          "category": "Unrelated",
+          "candidate_index": 1
+        }
+      ],
+      "article_category": "Other"
+    },
+    "detectedClaims": [
+      {
+        "end": null,
+        "raw": {
+          "_id": "6acccbd0e9b2dc05380ccfda",
+          "claim": "The Earth orbits the Sun.",
+          "score": 0.8679061532020569,
+          "collection": "detected_claims",
+          "resolved_claim": null,
+          "checkworthiness_score": 1
+        },
+        "text": "The Earth orbits the Sun.",
+        "score": 0.8679061532020569,
+        "start": null,
+        "chunk_index": 0,
+        "chunk_claim_index": 0,
+        "checkworthiness_score": 1.0
+      },
+      {
+        "end": null,
+        "raw": {
+          "_id": "6acccbd0e9b2dc05380ccfdb",
+          "claim": "The Moon reflects sunlight.",
+          "score": 0.9197363257408142,
+          "collection": "detected_claims",
+          "resolved_claim": null,
+          "checkworthiness_score": 1
+        },
+        "text": "The Moon reflects sunlight.",
+        "score": 0.9197363257408142,
+        "start": null,
+        "chunk_index": 0,
+        "chunk_claim_index": 1,
+        "checkworthiness_score": 1.0
+      }
+    ]
+  },
+  "article_category": "Other",
+  "error": {
+    "errors": [
+      {
+        "stage": "advertorial",
+        "errorType": "ExternalCallFailed"
+      },
+      {
+        "stage": "transformation",
+        "errorType": "ExternalCallFailed"
+      }
+    ]
+  },
+  "advertorial_result": {},
+  "transformation_result": null
+}

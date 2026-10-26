@@ -1,0 +1,11 @@
+{
+  "name": "vital-web-demo",
+  "private": true,
+  "version": "1.11.1",
+  "scripts": {
+    "test:ui": "node web/tests/demo-dom.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

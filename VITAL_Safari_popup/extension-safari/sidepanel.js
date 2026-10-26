@@ -39,9 +39,11 @@ function node(tag, className = "", text = "") {
   return item;
 }
 
+let demoEnded = false;
 async function api(path, body) {
+  if (demoEnded) throw new Error("This demo has ended.");
   const response = await fetch(
-    VITAL_BACKEND_URL.replace(/\/$/, "") + path,
+    VITAL_BACKEND_URL.replace(/\/$/, "") + "/demo-api/v1" + path,
     body === undefined
       ? {}
       : {
@@ -51,6 +53,16 @@ async function api(path, body) {
         },
   );
   const data = await response.json();
+  if (response.status === 410 && data.code === "demo_ended") {
+    demoEnded = true;
+    clearTimeout(pollTimer);
+    clearTimeout(catalogueTimer);
+    current = null;
+    stories = [];
+    for (const child of document.body.children) child.hidden = true;
+    document.body.append(node("main", "demo-ended", "This demo has ended."));
+    throw new Error("This demo has ended.");
+  }
   if (!response.ok)
     throw new Error(
       typeof data.detail === "string"

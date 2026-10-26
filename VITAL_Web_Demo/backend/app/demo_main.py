@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -37,6 +37,7 @@ from .vital_api import (
 
 class DemoConfig(BaseSettings):
     demo_admin_password: str
+    demo_extensions_enabled: bool = False
     demo_database: str = "data/demo.sqlite3"
     demo_secure_cookies: bool = False
     demo_public_url: str = ""
@@ -89,6 +90,24 @@ app.mount("/media", StaticFiles(directory=media), name="media")
 
 @app.middleware("http")
 async def browser_headers(request, call_next):
+    demo_prefix = "/demo-api/v1"
+    path = request.scope["path"]
+    if path == demo_prefix or path.startswith(demo_prefix + "/"):
+        suffix = path[len(demo_prefix):]
+        allowed = (
+            suffix == "/health" and request.method == "GET"
+            or suffix == "/api/demo/import" and request.method == "POST"
+            or suffix == "/api/demo/articles" and request.method == "GET"
+            or re.fullmatch(r"/api/demo/articles/[^/]+", suffix) and request.method == "GET"
+            or re.fullmatch(r"/api/demo/articles/[^/]+/(analyse|claims|feedback)", suffix) and request.method == "POST"
+            or re.fullmatch(r"/api/demo/articles/[^/]+/claims/[^/]+/check", suffix) and request.method == "POST"
+        )
+        if request.method != "OPTIONS" and not config.demo_extensions_enabled:
+            return JSONResponse({"detail": "This demo has ended.", "code": "demo_ended"}, status_code=410, headers={"Cache-Control": "no-store"})
+        if not allowed and request.method != "OPTIONS":
+            return JSONResponse({"detail": "Not found"}, status_code=404)
+        request.scope["path"] = suffix
+        request.scope["raw_path"] = suffix.encode()
     if request.method in {"POST", "PUT", "DELETE"}:
         origin = request.headers.get("origin")
         if (
@@ -675,7 +694,7 @@ def start_analysis(identifier, prepared=False, features=None):
 async def health():
     return {
         "status": "ok",
-        "version": "1.11.1",
+        "version": "1.12.0",
         "vital_api_configured": bool(config.vital_api_key),
         "analysis_service": config.vital_api_base,
     }

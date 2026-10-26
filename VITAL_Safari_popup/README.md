@@ -1,4 +1,4 @@
-# VITAL Safari popup 1.11.1
+# VITAL Safari popup 1.12.0
 
 Remove the old temporary VITAL from Safari Settings > Extensions. Keep older installed copies disabled. Open Settings > Developer > Add Temporary Extension, select extension-safari from this folder, and refresh the article.
 

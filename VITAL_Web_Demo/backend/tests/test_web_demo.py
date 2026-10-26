@@ -616,3 +616,18 @@ def test_cached_commercial_details_are_remapped_without_analysis(demo):
         "server_response": {"claim_result": {}, "advertorial_result": {"label": "non-advertorial", "confidence": .9, "input_tokens": 20}}}
     result = demo.public_article(record)
     assert result["analysis"]["article"]["advertorial"]["input_tokens"] == 20
+
+
+def test_demo_extension_switch_preserves_website(demo, monkeypatch):
+    with TestClient(demo.app) as client:
+        monkeypatch.setattr(demo.config, "demo_extensions_enabled", True)
+        assert client.get("/demo-api/v1/api/demo/articles").status_code == 200
+        assert client.get("/demo-api/v1/health").status_code == 200
+        assert client.get("/demo-api/v1/admin").status_code == 404
+        monkeypatch.setattr(demo.config, "demo_extensions_enabled", False)
+        for method, path in [("GET", "/api/demo/articles"), ("GET", "/api/demo/articles/example"), ("POST", "/api/demo/import"), ("POST", "/api/demo/articles/example/claims")]:
+            response = client.request(method, "/demo-api/v1" + path)
+            assert response.status_code == 410
+            assert response.json()["code"] == "demo_ended"
+        assert client.get("/api/demo/articles").status_code == 200
+        assert client.get("/health").status_code == 200

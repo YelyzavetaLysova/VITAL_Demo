@@ -1,6 +1,6 @@
-# VITAL web demo 1.11.1
+# VITAL web demo 1.12.0
 
-Open this folder in VS Code and run `python3 start_backend.py` for a local server. To update NREC, stage this folder separately, stop vital-demo, run `python3 update_existing.py /home/ubuntu/VITAL_Web_Demo`, and start vital-demo again. The updater preserves configuration, keys, data and venv. Health reports 1.11.1. The central analysis API is not modified.
+Open this folder in VS Code and run `python3 start_backend.py` for a local server. To update NREC, stage this folder separately, stop vital-demo, run `python3 update_existing.py /home/ubuntu/VITAL_Web_Demo`, and start vital-demo again. The updater preserves configuration, keys, data and venv. Health reports 1.12.0. The central analysis API is not modified.
 
 New articles appear first. All widget changes are listed in the archive-level README. Original server statuses remain unchanged; the widget groups pending and skipped under Not Health Claim. Source and classifier details from saved server responses are remapped without reanalysing articles.
 

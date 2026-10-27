@@ -10,6 +10,31 @@ from app.demo_import import image_snapshot, parse_article, public_url
 from app.demo_store import DemoStore
 
 
+@pytest.mark.asyncio
+async def test_more_than_ten_article_jobs_are_accepted(demo, monkeypatch):
+    started = []
+    release = asyncio.Event()
+
+    async def fake_analysis(identifier, *args):
+        started.append(identifier)
+        await release.wait()
+
+    monkeypatch.setattr(demo, "run_analysis", fake_analysis)
+    for index in range(12):
+        record = demo.store.save(article_data(url=f"https://example.com/{index}"))
+        demo.start_analysis(record["id"])
+    await asyncio.sleep(0)
+    try:
+        assert len(started) == 12
+        demo.start_analysis(started[0])
+        await asyncio.sleep(0)
+        assert len(started) == 12
+    finally:
+        release.set()
+        await asyncio.gather(*demo.tasks.values())
+        demo.tasks.clear()
+
+
 def article_data(**changes):
     return {
         "title": "A test article",
@@ -399,6 +424,27 @@ def test_widget_articles_are_private_and_reused(demo):
             "/api/widget/articles", json=article_data(), headers={"Origin": origin}
         )
         assert response.headers["access-control-allow-origin"] == origin
+
+
+def test_demo_widget_import_read_and_shutdown(demo, monkeypatch):
+    origin = "chrome-extension://abcdef"
+    prefix = "/demo-api/v1"
+    with TestClient(demo.app) as client:
+        monkeypatch.setattr(demo.config, "demo_extensions_enabled", True)
+        preflight = client.options(prefix + "/api/widget/articles", headers={
+            "Origin": origin, "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type"})
+        assert preflight.status_code == 200
+        response = client.post(prefix + "/api/widget/articles", json=article_data(), headers={"Origin": origin})
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == origin
+        identifier = response.json()["id"]
+        assert client.get(prefix + "/api/demo/articles/" + identifier).status_code == 200
+        assert client.get("/api/demo/articles").json() == []
+        monkeypatch.setattr(demo.config, "demo_extensions_enabled", False)
+        assert client.post(prefix + "/api/widget/articles", json=article_data()).status_code == 410
+        assert client.get(prefix + "/api/demo/articles/" + identifier).status_code == 410
+        assert client.post("/api/widget/articles", json=article_data()).status_code == 200
 
 
 def test_visitor_articles_prepend_to_shared_catalogue_and_start_analysis(

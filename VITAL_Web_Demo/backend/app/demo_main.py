@@ -58,8 +58,6 @@ media.mkdir(parents=True, exist_ok=True)
 sessions = {}
 login_attempts = {}
 tasks = {}
-remote_slots = asyncio.Semaphore(2)
-article_slots = asyncio.Semaphore(2)
 
 
 @asynccontextmanager
@@ -95,7 +93,8 @@ async def browser_headers(request, call_next):
     if path == demo_prefix or path.startswith(demo_prefix + "/"):
         suffix = path[len(demo_prefix):]
         allowed = (
-            suffix == "/health" and request.method == "GET"
+            suffix == "/api/widget/articles" and request.method == "POST"
+            or suffix == "/health" and request.method == "GET"
             or suffix == "/api/demo/import" and request.method == "POST"
             or suffix == "/api/demo/articles" and request.method == "GET"
             or re.fullmatch(r"/api/demo/articles/[^/]+", suffix) and request.method == "GET"
@@ -431,47 +430,46 @@ async def verify_claim(identifier, claim_id):
         ),
     )
     try:
-        async with remote_slots:
-            client = vital_client()
-            accepted = None
-            remote_id = claim.get("remote_analysis_id")
-            if not remote_id:
-                accepted = await client.submit(
-                    submission_payload(
-                        record,
-                        config.demo_public_url,
-                        claim["text"],
-                        claim.get("theme"),
-                    )
+        client = vital_client()
+        accepted = None
+        remote_id = claim.get("remote_analysis_id")
+        if not remote_id:
+            accepted = await client.submit(
+                submission_payload(
+                    record,
+                    config.demo_public_url,
+                    claim["text"],
+                    claim.get("theme"),
                 )
-                remote_id = accepted["analysis_id"]
-                modify(
-                    identifier,
-                    lambda current: set_claim(
-                        current, {"remote_analysis_id": remote_id}
-                    ),
-                )
-            snapshot = await fetch_remote_result(client, remote_id, accepted)
-            claims, _, _ = normalise_result(snapshot)
-            matched = next(
-                (
-                    item
-                    for item in claims
-                    if " ".join(item["text"].split()).lower()
-                    == " ".join(claim["text"].split()).lower()
-                ),
-                None,
             )
-            if matched is None:
-                raise VitalApiError(
-                    "VITAL did not return a matching assessment for the selected passage."
-                )
-            updates = {
-                **matched,
-                "id": claim_id,
-                "text": claim["text"],
-                "remote_analysis_id": remote_id,
-            }
+            remote_id = accepted["analysis_id"]
+            modify(
+                identifier,
+                lambda current: set_claim(
+                    current, {"remote_analysis_id": remote_id}
+                ),
+            )
+        snapshot = await fetch_remote_result(client, remote_id, accepted)
+        claims, _, _ = normalise_result(snapshot)
+        matched = next(
+            (
+                item
+                for item in claims
+                if " ".join(item["text"].split()).lower()
+                == " ".join(claim["text"].split()).lower()
+            ),
+            None,
+        )
+        if matched is None:
+            raise VitalApiError(
+                "VITAL did not return a matching assessment for the selected passage."
+            )
+        updates = {
+            **matched,
+            "id": claim_id,
+            "text": claim["text"],
+            "remote_analysis_id": remote_id,
+        }
     except Exception as exc:
         print(
             f"VITAL passage request error: {str(exc) if isinstance(exc, VitalApiError) else type(exc).__name__}"
@@ -491,155 +489,154 @@ async def verify_claim(identifier, claim_id):
 
 async def run_analysis(identifier, prepared=False, features=None):
     try:
-        async with article_slots:
-            record = store.get(identifier)
-            previous = record["analysis"] or {}
-            analysis_id = previous.get("analysis_id") or uuid4().hex
-            remote_id = previous.get("remote_analysis_id")
-            modify(
-                identifier,
-                lambda current: {
-                    **(current or {}),
-                    "analysis_id": analysis_id,
-                    "phase": "detecting",
-                    "claims": previous.get("claims", []),
-                    "article": previous.get("article", {}),
-                    "article_ready": False,
-                    "warnings": [],
-                    "started_at": previous.get("started_at") or now(),
-                    "message": "Submitting article to VITAL.",
-                },
+        record = store.get(identifier)
+        previous = record["analysis"] or {}
+        analysis_id = previous.get("analysis_id") or uuid4().hex
+        remote_id = previous.get("remote_analysis_id")
+        modify(
+            identifier,
+            lambda current: {
+                **(current or {}),
+                "analysis_id": analysis_id,
+                "phase": "detecting",
+                "claims": previous.get("claims", []),
+                "article": previous.get("article", {}),
+                "article_ready": False,
+                "warnings": [],
+                "started_at": previous.get("started_at") or now(),
+                "message": "Submitting article to VITAL.",
+            },
+        )
+        client = vital_client()
+        accepted = None
+        if not remote_id:
+            accepted = await client.submit(
+                submission_payload(record, config.demo_public_url)
             )
-            client = vital_client()
-            accepted = None
-            if not remote_id:
-                accepted = await client.submit(
-                    submission_payload(record, config.demo_public_url)
-                )
-                remote_id = accepted["analysis_id"]
-                modify(
-                    identifier,
-                    lambda current: {
-                        **current,
-                        "remote_analysis_id": remote_id,
-                        "server_cache_hit": bool(accepted.get("cache_hit")),
-                        "server_source_analysis_id": accepted.get("source_analysis_id"),
-                    },
-                )
-
-            progress = CoordinatorProgress()
-
-            def publish_event(event):
-                partial = progress.consume(event)
-                if not partial:
-                    return
-                claims, article = partial["claims"], partial["article"]
-                if features is not None:
-                    claims, article = prepared_results(claims, article, features)
-
-                def update(current):
-                    if not current or current["analysis_id"] != analysis_id:
-                        return current
-                    current.update(
-                        message=partial["message"],
-                        progress_stage=partial["stage"],
-                        detected_count=partial["detected_count"],
-                        checked_count=partial["checked_count"],
-                        updated_at=now(),
-                    )
-                    if claims:
-                        current["claims"] = claims
-                    available = {
-                        key: value
-                        for key, value in article.items()
-                        if value is not None and value != []
-                    }
-                    current["article"] = {**current.get("article", {}), **available}
-                    return current
-
-                modify(identifier, update)
-
-            def publish(snapshot):
-                status = result_status(snapshot)
-                claims, article, warnings = normalise_result(snapshot)
-                if features is not None:
-                    claims, article = prepared_results(claims, article, features)
-                if status == "partial":
-                    warnings.append(
-                        "VITAL completed with partial results. Some outputs may be unavailable."
-                    )
-
-                def update(current):
-                    if not current or current["analysis_id"] != analysis_id:
-                        return current
-                    current.update(
-                        prepared_features=features,
-                        remote_status=status,
-                        server_response=snapshot,
-                        message=(
-                            (
-                                current.get("message")
-                                if current.get("progress_stage")
-                                else (
-                                    "Waiting in the server queue."
-                                    if status == "queued"
-                                    else "Processing article."
-                                )
-                            )
-                            if status in {"queued", "running"}
-                            else "Results received from VITAL."
-                        ),
-                        phase=(
-                            "detecting"
-                            if status == "queued"
-                            else (
-                                "checking"
-                                if status == "running"
-                                else (
-                                    "completed"
-                                    if status in {"complete", "partial"}
-                                    else "failed"
-                                )
-                            )
-                        ),
-                        warnings=warnings,
-                        updated_at=now(),
-                    )
-                    # Some snapshots only contain progress. Keep already-received data.
-                    if claims:
-                        current["claims"] = claims
-                    if article:
-                        if status in {"complete", "partial"}:
-                            current["article"] = article
-                        else:
-                            current["article"] = {
-                                **current.get("article", {}),
-                                **{
-                                    key: value
-                                    for key, value in article.items()
-                                    if value is not None and value != []
-                                },
-                            }
-                    current["article_ready"] = status in {"complete", "partial"}
-                    return current
-
-                modify(identifier, update)
-
-            snapshot = await fetch_remote_result(
-                client, remote_id, accepted, publish, publish_event
-            )
+            remote_id = accepted["analysis_id"]
             modify(
                 identifier,
                 lambda current: {
                     **current,
-                    "phase": "completed",
-                    "completed_at": now(),
-                    "message": "Results received from VITAL.",
-                    "partial": result_status(snapshot) == "partial",
+                    "remote_analysis_id": remote_id,
+                    "server_cache_hit": bool(accepted.get("cache_hit")),
+                    "server_source_analysis_id": accepted.get("source_analysis_id"),
                 },
             )
-            if prepared:
-                store.prepared(identifier)
+
+        progress = CoordinatorProgress()
+
+        def publish_event(event):
+            partial = progress.consume(event)
+            if not partial:
+                return
+            claims, article = partial["claims"], partial["article"]
+            if features is not None:
+                claims, article = prepared_results(claims, article, features)
+
+            def update(current):
+                if not current or current["analysis_id"] != analysis_id:
+                    return current
+                current.update(
+                    message=partial["message"],
+                    progress_stage=partial["stage"],
+                    detected_count=partial["detected_count"],
+                    checked_count=partial["checked_count"],
+                    updated_at=now(),
+                )
+                if claims:
+                    current["claims"] = claims
+                available = {
+                    key: value
+                    for key, value in article.items()
+                    if value is not None and value != []
+                }
+                current["article"] = {**current.get("article", {}), **available}
+                return current
+
+            modify(identifier, update)
+
+        def publish(snapshot):
+            status = result_status(snapshot)
+            claims, article, warnings = normalise_result(snapshot)
+            if features is not None:
+                claims, article = prepared_results(claims, article, features)
+            if status == "partial":
+                warnings.append(
+                    "VITAL completed with partial results. Some outputs may be unavailable."
+                )
+
+            def update(current):
+                if not current or current["analysis_id"] != analysis_id:
+                    return current
+                current.update(
+                    prepared_features=features,
+                    remote_status=status,
+                    server_response=snapshot,
+                    message=(
+                        (
+                            current.get("message")
+                            if current.get("progress_stage")
+                            else (
+                                "Waiting in the server queue."
+                                if status == "queued"
+                                else "Processing article."
+                            )
+                        )
+                        if status in {"queued", "running"}
+                        else "Results received from VITAL."
+                    ),
+                    phase=(
+                        "detecting"
+                        if status == "queued"
+                        else (
+                            "checking"
+                            if status == "running"
+                            else (
+                                "completed"
+                                if status in {"complete", "partial"}
+                                else "failed"
+                            )
+                        )
+                    ),
+                    warnings=warnings,
+                    updated_at=now(),
+                )
+                # Some snapshots only contain progress. Keep already-received data.
+                if claims:
+                    current["claims"] = claims
+                if article:
+                    if status in {"complete", "partial"}:
+                        current["article"] = article
+                    else:
+                        current["article"] = {
+                            **current.get("article", {}),
+                            **{
+                                key: value
+                                for key, value in article.items()
+                                if value is not None and value != []
+                            },
+                        }
+                current["article_ready"] = status in {"complete", "partial"}
+                return current
+
+            modify(identifier, update)
+
+        snapshot = await fetch_remote_result(
+            client, remote_id, accepted, publish, publish_event
+        )
+        modify(
+            identifier,
+            lambda current: {
+                **current,
+                "phase": "completed",
+                "completed_at": now(),
+                "message": "Results received from VITAL.",
+                "partial": result_status(snapshot) == "partial",
+            },
+        )
+        if prepared:
+            store.prepared(identifier)
     except asyncio.CancelledError:
         raise
     except Exception as exc:
@@ -673,8 +670,6 @@ async def run_analysis(identifier, prepared=False, features=None):
 def start_analysis(identifier, prepared=False, features=None):
     if identifier in tasks:
         return
-    if len(tasks) >= 10:
-        raise HTTPException(429, "The demo is busy. Try again shortly.")
     modify(
         identifier,
         lambda current: {
@@ -694,7 +689,7 @@ def start_analysis(identifier, prepared=False, features=None):
 async def health():
     return {
         "status": "ok",
-        "version": "1.12.0",
+        "version": "1.13.0",
         "vital_api_configured": bool(config.vital_api_key),
         "analysis_service": config.vital_api_base,
     }

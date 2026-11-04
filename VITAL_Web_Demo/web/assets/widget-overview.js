@@ -178,9 +178,9 @@ function coverageRows(analysis) {
   if (!coverage || typeof coverage !== "object") return [];
   const rows = [];
   for (const [key, label] of [
-    ["submitted_claims", "Submitted for verification"],
-    ["assessed_claims", "Assessed"],
-    ["unassessed_claims", "Not assessed"],
+    ["submitted_claims", "Sent for checking"],
+    ["assessed_claims", "Checked"],
+    ["unassessed_claims", "Not checked"],
   ]) {
     const value = coverage[key];
     if (Number.isInteger(value) && value >= 0) rows.push([label, value]);
@@ -212,7 +212,7 @@ function renderOverview(analysis) {
   for (const [status, count] of Object.entries(totals.statuses))
     countRows.push([labels[status] || status, count, status]);
   if (totals.awaiting)
-    countRows.push(["Awaiting claim details", totals.awaiting]);
+    countRows.push(["Waiting for claim details", totals.awaiting]);
   const specs = [
     [
       "Source",
@@ -245,7 +245,7 @@ function renderOverview(analysis) {
       "Commercial content",
       [["Result", commercialDescription(data.advertorial) || unavailable]],
       data.advertorial
-        ? "Automated classification, not a finding of undisclosed advertising."
+        ? "This automatic check looks for promotional content. It cannot confirm whether the publisher was paid."
         : "",
     ],
     ["Claims", countRows],
@@ -255,7 +255,7 @@ function renderOverview(analysis) {
     specs.push([
       "Verification coverage",
       coverage,
-      "Final API figures for claims submitted for verification. Not assessed does not mean Not Health Claim.",
+      "Shows how many submitted claims received a result. A claim can be health-related and still remain unchecked.",
     ]);
   const container = document.querySelector("#summaryInsights");
   const fingerprint = JSON.stringify([
@@ -326,14 +326,14 @@ function historicalContext(data) {
       box.append(part);
       return;
     }
-    part.append(node("p", "", `${pct(value.support_percent)} Supported`));
-    part.append(node("p", "small muted", "Among assessed claims in this historical group."));
+    part.append(node("p", "", `${pct(value.support_percent)} of assessed claims were supported`));
+    part.append(node("p", "small muted", title.startsWith("Medical term") ? `Based on assessed claims in articles mentioning ${value.name || "this medical term"}.` : "Based on assessed claims in articles from publishers in this country."));
     rows(part, [
-      ["Dataset overall", pct(value.overall_support_percent ?? overall?.support_percent)],
+      ["Supported claims across the dataset", pct(value.overall_support_percent ?? overall?.support_percent)],
       ["Articles", count(value.total_articles)],
       ["Assessed claims", count(value.assessed_claims)],
       ["Submitted claims", count(value.submitted_claims)],
-      ["Assessment coverage", pct(value.assessment_coverage_percent)],
+      ["Claims assessed (%)", pct(value.assessment_coverage_percent)],
     ]);
     const difference = value.difference_percentage_points;
     if (number(difference)) part.append(node("p", "small", difference === 0
@@ -354,7 +354,7 @@ function historicalContext(data) {
     details.append(node("summary", "", "Compare with other countries"));
     rows(details, (peer.country_statistics || []).map(v => [v.country, `${pct(v.support_percent)} Supported`]));
     rows(details, [["Comparison average", pct(peer.support_percent)]]);
-    details.append(node("p", "small muted", "Each comparison country has equal weight. This differs from pooling all assessed claims."));
+    details.append(node("p", "small muted", "The comparison averages the country percentages, giving each country equal weight."));
     countryPart.append(details);
   }
   const about = node("details", "note-details");
@@ -365,12 +365,37 @@ function historicalContext(data) {
     ["Dataset", dataset.name || "Not available"], ["Version", dataset.version || "Not available"],
     ["Articles", count(dataset.total_articles)],
     ["Publication dates", `${date(dataset.first_published_at)} to ${date(dataset.last_published_at)}`],
-    ["Overall assessment coverage", pct(data.overall?.assessment_coverage_percent)],
+    ["Claims assessed across the dataset (%)", pct(data.overall?.assessment_coverage_percent)],
   ]);
   if (data.medical_term?.mesh_id) rows(about, [["MeSH", data.medical_term.mesh_id]]);
-  about.append(node("p", "small muted", "Supported means the share of assessed claims labelled SUPPORTS. Unassessed claims are not counted as unsupported. The overall comparison includes this group. This selected dataset does not represent all news."));
+  about.append(node("p", "small muted", "Supported means that the evidence supported the claim. Only assessed claims count towards this percentage. Unchecked claims are not counted as unsupported. The dataset comparison includes this group and does not represent all news."));
   if (data.methodology?.primary_term_method === "most_mentions_mesh_v1")
     about.append(node("p", "small muted", "The medical term is selected by the most mentions and matched using its MeSH identifier."));
   box.append(about);
+  return box;
+}
+
+
+function evidenceExplanation(text) {
+  const box = node("div", "evidence-explanation");
+  const value = String(text);
+  const pattern = /\b(SUPPORTS?|REFUTES?|CONTRADICTS?)\s*:\s*/gi;
+  const matches = [...value.matchAll(pattern)];
+  if (!matches.length) { box.append(node("p", "", value)); return box; }
+  const intro = value.slice(0, matches[0].index).trim();
+  if (intro) box.append(node("p", "", intro));
+  let lastHeading = "", list;
+  matches.forEach((match, i) => {
+    const heading = /^SUPPORT/i.test(match[1]) ? "Supporting evidence" : "Refuting evidence";
+    const passage = value.slice(match.index + match[0].length, matches[i + 1]?.index ?? value.length).trim();
+    if (!passage) return;
+    if (heading !== lastHeading) {
+      box.append(node("h3", "", heading));
+      list = node("ul"); list.style.paddingInlineStart = "20px";
+      box.append(list); lastHeading = heading;
+    }
+    const item = node("li", "", passage); item.style.marginBlock = "8px";
+    list.append(item);
+  });
   return box;
 }

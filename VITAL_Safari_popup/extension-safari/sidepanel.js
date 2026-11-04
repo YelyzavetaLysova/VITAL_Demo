@@ -27,9 +27,9 @@ function feedbackClientId() {
   return clientId;
 }
 const labels = {
-  pending: "Not Health Claim",
-  skipped: "Not Health Claim",
-  not_health_claim: "Not Health Claim",
+  pending: "Not selected for checking",
+  skipped: "Not selected for checking",
+  not_health_claim: "Not selected for checking",
   checking: "Checking",
   supported: "Supported",
   contradicted: "Refuted",
@@ -464,7 +464,7 @@ function claimCard(claim, index) {
     else opened.delete(claim.id);
   });
   const body = node("div", "claim-detail");
-  if (claim.explanation) body.append(node("p", "", claim.explanation));
+  if (claim.explanation) body.append(evidenceExplanation(claim.explanation));
   if (claim.model_accepted === false || String(claim.model_category || "").toLowerCase() === "non-health") {
     body.append(node("p", "small muted", "Rejected by health filter"));
     if (claim.model_reason) body.append(node("p", "small muted", claim.model_reason));
@@ -472,12 +472,12 @@ function claimCard(claim, index) {
   if (claim.manual_origin === "user_requested")
     body.append(node("p", "small muted", "User-requested analysis"));
   if (claim.api_error_type)
-    body.append(node("p", "small muted", `API error: ${claim.api_error_type}`));
+    body.append(node("p", "small muted", `Service error: ${claim.api_error_type}`));
   if (claim.can_analyze_manually && ["pending", "error", "skipped"].includes(claim.status)) {
     const analyse = node(
       "button",
       "primary analyse-claim",
-      claim.origin === "user_selected" ? "Analyse claim" : (claim.status === "error" ? "Resume assessment" : "Analyse anyway"),
+      claim.origin === "user_selected" ? "Analyse claim" : (claim.status === "error" ? "Continue checking" : "Analyse anyway"),
     );
     analyse.type = "button";
     analyse.disabled = current.analysis.phase !== "completed";
@@ -494,7 +494,7 @@ function claimCard(claim, index) {
   }
   const summaryText = readable(claim.summary);
   if (summaryText && summaryText !== claim.explanation)
-    body.append(node("p", "", summaryText));
+    body.append(evidenceExplanation(summaryText));
   if (!["pending", "checking", "error", "skipped"].includes(claim.status)) {
     body.append(node("h3", "", `Evidence · ${(claim.evidence || []).length}`));
     if (!claim.evidence?.length)
@@ -628,7 +628,7 @@ function renderInsights(analysis) {
       "Commercial content",
       "advertorial",
       commercialRows,
-      "Automated classification, not a finding of undisclosed advertising.",
+      "This automatic check looks for promotional content. It cannot confirm whether the publisher was paid.",
     ]);
   }
   const toneRows = [];
@@ -697,10 +697,10 @@ function renderInsights(analysis) {
       "Medical terms",
       "medical_entities",
       medical.length ? medical : [["Result", "None detected"]],
-      "MeSH identifies terms in the Medical Subject Headings vocabulary. These are terminology references, not diagnoses.",
+      "MeSH codes identify medical terms in a standard vocabulary. They are not diagnoses.",
     ]);
   if (data.historical_insights && typeof data.historical_insights === "object")
-    specs.push(["Historical context", "historical_insights", [], "These figures describe historical claims assessed by VITAL. They are not a truthfulness score for this article."]);
+    specs.push(["Historical context", "historical_insights", [], "These results come from previously analysed articles. They do not indicate how accurate this article is."]);
   if (typeof data.word_count === "number")
     specs.push(["Word count", "word_count", [["Words", data.word_count]]]);
   function reconcile(container, sections) {
@@ -801,14 +801,10 @@ function renderAnalysis() {
   const isRunning =
     analysis &&
     ["detecting", "checking", "classifying"].includes(analysis.phase);
-  $("#analyseIntro").hidden = Boolean(
-    analysis &&
-    !analysis.prepared_features &&
-    !["failed", "interrupted"].includes(analysis.phase),
-  );
+  $("#analyseIntro").hidden = Boolean(isRunning);
   $("#analyse").disabled = Boolean(isRunning);
   $("#analyse").textContent =
-    analysis?.phase === "interrupted" ? "Resume analysis" : "Analyse";
+    analysis?.phase === "completed" ? "Analyse again" : (analysis?.phase === "interrupted" ? "Resume analysis" : "Analyse");
   $("#progress").hidden = !isRunning && checking.size === 0;
   $("#progressText").textContent =
     analysis?.remote_status === "queued"
@@ -1061,7 +1057,7 @@ $("#analyse").addEventListener("click", async () => {
       return;
     }
     await registerExtensionArticle();
-    await api(`/api/demo/articles/${current.id}/analyse`, {});
+    await api(`/api/demo/articles/${current.id}/analyse${current.analysis?.phase === "completed" ? "?again=true" : ""}`, {});
     await refreshArticle(expectedRoute);
     poll();
   } catch (error) {

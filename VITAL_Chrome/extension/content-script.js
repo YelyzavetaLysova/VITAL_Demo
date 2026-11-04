@@ -170,8 +170,8 @@
       mark.dataset.vitalStatus = claim.status;
       const statusLabel =
         {
-          pending: "Not Health Claim",
-          skipped: "Not Health Claim",
+          pending: "Not selected for checking",
+          skipped: "Not selected for checking",
           checking: "Checking",
           supported: "Supported",
           contradicted: "Refuted",

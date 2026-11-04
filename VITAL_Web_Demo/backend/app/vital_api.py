@@ -73,7 +73,6 @@ def submission_payload(article, public_base="", selected_text=None, category=Non
         "content": selected_text or article["text"],
         "url": url,
         "language": article.get("language") or "en",
-        "country": article.get("country") or "NO",
         "provider": article.get("publisher") or None,
         "category": category or article.get("theme") or "other",
     }

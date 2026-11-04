@@ -721,3 +721,21 @@ async def test_api_final_coverage_is_stored_with_completed_analysis(demo, monkey
     result = demo.public_article(demo.store.get(record["id"]))["analysis"]
     assert result["phase"] == "completed"
     assert result["assessment_coverage"] == coverage
+
+
+@pytest.mark.asyncio
+async def test_analyse_again_starts_new_job_and_blocks_duplicate(demo, monkeypatch):
+    record = demo.store.save(article_data())
+    demo.store.change_analysis(record["id"], lambda _: {"analysis_id": "old", "phase": "completed", "claims": []})
+    calls = []
+    monkeypatch.setattr(demo, "start_analysis", lambda identifier, **kw: calls.append((identifier, kw)))
+    assert (await demo.begin(record["id"]))["cached"] is True
+    assert not calls
+    assert (await demo.begin(record["id"], again=True))["requested_again"] is True
+    assert calls == [(record["id"], {"fresh": True})]
+    demo.tasks[record["id"]] = object()
+    try:
+        assert (await demo.begin(record["id"], again=True))["already_running"] is True
+        assert len(calls) == 1
+    finally:
+        demo.tasks.pop(record["id"])

@@ -28,7 +28,7 @@ def test_submission_matches_documented_contract():
     assert result["content"] == record["text"]
     assert result["provider"] == "Example"
     assert result["category"] == "health"
-    assert result["country"] == "NO"
+    assert "country" not in result
     assert result["image_url"] == "https://example.com/photo.jpg"
     assert result["published_at"].startswith("2026-10-12T10:00")
     record["published_at"] = "2026-10-12"

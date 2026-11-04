@@ -195,7 +195,7 @@ class ArticleInput(BaseModel):
     text: str = Field(min_length=12, max_length=120000)
     url: str = Field(default="", max_length=3000)
     publisher: str = Field(default="", max_length=200)
-    country: str = Field(default="NO", min_length=2, max_length=5)
+    country: str = Field(default="", max_length=5)
     original_image_url: str = Field(default="", max_length=2083)
     author: str = Field(default="", max_length=500)
     published_at: str = Field(default="", max_length=100)
@@ -584,23 +584,24 @@ async def verify_claim(identifier, claim_id):
     modify(identifier, lambda current: set_claim(current, updates))
 
 
-async def run_analysis(identifier, prepared=False, features=None):
+async def run_analysis(identifier, prepared=False, features=None, fresh=False):
     try:
         record = store.get(identifier)
         previous = record["analysis"] or {}
-        analysis_id = previous.get("analysis_id") or uuid4().hex
-        remote_id = previous.get("remote_analysis_id")
+        analysis_id = uuid4().hex if fresh else (previous.get("analysis_id") or uuid4().hex)
+        remote_id = None if fresh else previous.get("remote_analysis_id")
         modify(
             identifier,
             lambda current: {
-                **(current or {}),
+                **{key: value for key, value in (current or {}).items()
+                   if not fresh or key not in {"remote_analysis_id", "server_response", "assessment_coverage", "completed_at", "server_cache_hit", "server_source_analysis_id"}},
                 "analysis_id": analysis_id,
                 "phase": "detecting",
                 "claims": previous.get("claims", []),
                 "article": previous.get("article", {}),
                 "article_ready": False,
                 "warnings": [],
-                "started_at": previous.get("started_at") or now(),
+                "started_at": now() if fresh else (previous.get("started_at") or now()),
                 "message": "Submitting article to VITAL.",
             },
         )
@@ -658,6 +659,8 @@ async def run_analysis(identifier, prepared=False, features=None):
             claims, article, warnings = normalise_result(snapshot)
             if features is not None:
                 claims, article = prepared_results(claims, article, features)
+            if fresh and (accepted or {}).get("cache_hit"):
+                warnings.append("The service returned a saved result for this request.")
             if status == "partial":
                 warnings.append(
                     "VITAL completed with partial results. Some outputs may be unavailable."
@@ -772,7 +775,7 @@ async def run_analysis(identifier, prepared=False, features=None):
         tasks.pop(identifier, None)
 
 
-def start_analysis(identifier, prepared=False, features=None):
+def start_analysis(identifier, prepared=False, features=None, fresh=False):
     if identifier in tasks:
         return
     modify(
@@ -786,7 +789,7 @@ def start_analysis(identifier, prepared=False, features=None):
         },
     )
     tasks[identifier] = asyncio.create_task(
-        run_analysis(identifier, prepared, features)
+        run_analysis(identifier, prepared, features, fresh)
     )
 
 
@@ -794,7 +797,7 @@ def start_analysis(identifier, prepared=False, features=None):
 async def health():
     return {
         "status": "ok",
-        "version": "1.18.0",
+        "version": "1.19.0",
         "vital_api_configured": bool(config.vital_api_key),
         "analysis_service": config.vital_api_base,
     }
@@ -1074,8 +1077,13 @@ async def article(identifier: str):
 
 
 @app.post("/api/demo/articles/{identifier}/analyse")
-async def begin(identifier: str):
+async def begin(identifier: str, again: bool = False):
     record = article_record(identifier)
+    if identifier in tasks:
+        return {"started": False, "already_running": True}
+    if again:
+        start_analysis(identifier, fresh=True)
+        return {"started": True, "requested_again": True}
     if record["analysis"] and record["analysis"].get("phase") == "completed":
         if record["analysis"].get("prepared_features") is not None:
             claims, article, warnings = normalise_result(

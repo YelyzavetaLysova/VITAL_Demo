@@ -124,7 +124,7 @@ function providerRows(provider, record) {
   };
   const rows = Object.entries(provider || {}).map(([key, value]) => [
     names[key] || fieldLabel(key),
-    detailValue(value),
+    key === "country" ? countryName(value) : detailValue(value),
   ]);
   if (!provider?.source_name && !provider?.name && record.publisher)
     rows.unshift(["Source", record.publisher]);
@@ -262,6 +262,7 @@ function renderOverview(analysis) {
     specs,
     data.title_sentiment,
     data.content_sentiment,
+    data.topic_reason || data.classification?.category_reason,
   ]);
   if (container.dataset.signature === fingerprint) return;
   container.dataset.signature = fingerprint;
@@ -277,6 +278,10 @@ function renderOverview(analysis) {
         list.append(row);
       }
       card.append(list);
+      if (title === "Topic and subtopic") {
+        const explanation = data.topic_reason || data.classification?.category_reason;
+        if (explanation) card.append(node("p", "topic-explanation", explanation));
+      }
       if (title === "Article framing") {
         const bars = framingBars(data);
         if (bars.children.length) {
@@ -291,7 +296,7 @@ function renderOverview(analysis) {
           card.insertBefore(bars, list);
         }
       }
-      if (note) card.append(node("p", "small muted", note));
+      if (note) card.append(node("p", "result-note", note));
       return card;
     }),
   );
@@ -327,7 +332,7 @@ function historicalContext(data) {
       return;
     }
     part.append(node("p", "", `${pct(value.support_percent)} of assessed claims were supported`));
-    part.append(node("p", "small muted", title.startsWith("Medical term") ? `Based on assessed claims in articles mentioning ${value.name || "this medical term"}.` : "Based on assessed claims in articles from publishers in this country."));
+    part.append(node("p", "result-note", title.startsWith("Medical term") ? `Based on assessed claims in articles mentioning ${value.name || "this medical term"}.` : "Based on assessed claims in articles from publishers in this country."));
     rows(part, [
       ["Supported claims across the dataset", pct(value.overall_support_percent ?? overall?.support_percent)],
       ["Articles", count(value.total_articles)],
@@ -344,17 +349,16 @@ function historicalContext(data) {
   }
   stats(`Medical term${data.medical_term?.name ? ": " + data.medical_term.name : ""}`, data.medical_term, data.overall);
   const code = data.country?.country;
-  let country = code;
-  try { if (code) country = new Intl.DisplayNames(["en"], {type: "region"}).of(code); } catch (_) {}
+  const country = countryName(code);
   const countryPart = stats(`Country${country ? ": " + country : ""}`, data.country, data.overall);
-  if (countryPart) countryPart.append(node("p", "small muted", "Country refers to the publisher."));
+  if (countryPart) countryPart.append(node("p", "result-note", "Country refers to the publisher."));
   const peer = data.country?.peer_comparison;
   if (countryPart && peer?.status === "available") {
     const details = node("details", "note-details");
     details.append(node("summary", "", "Compare with other countries"));
-    rows(details, (peer.country_statistics || []).map(v => [v.country, `${pct(v.support_percent)} Supported`]));
+    rows(details, (peer.country_statistics || []).map(v => [countryName(v.country), `${pct(v.support_percent)} Supported`]));
     rows(details, [["Comparison average", pct(peer.support_percent)]]);
-    details.append(node("p", "small muted", "The comparison averages the country percentages, giving each country equal weight."));
+    details.append(node("p", "result-note", "The comparison averages the country percentages, giving each country equal weight."));
     countryPart.append(details);
   }
   const about = node("details", "note-details");
@@ -368,9 +372,9 @@ function historicalContext(data) {
     ["Claims assessed across the dataset (%)", pct(data.overall?.assessment_coverage_percent)],
   ]);
   if (data.medical_term?.mesh_id) rows(about, [["MeSH", data.medical_term.mesh_id]]);
-  about.append(node("p", "small muted", "Supported means that the evidence supported the claim. Only assessed claims count towards this percentage. Unchecked claims are not counted as unsupported. The dataset comparison includes this group and does not represent all news."));
+  about.append(node("p", "result-note", "Supported means that the evidence supported the claim. Only assessed claims count towards this percentage. Unchecked claims are not counted as unsupported. The dataset comparison includes this group and does not represent all news."));
   if (data.methodology?.primary_term_method === "most_mentions_mesh_v1")
-    about.append(node("p", "small muted", "The medical term is selected by the most mentions and matched using its MeSH identifier."));
+    about.append(node("p", "result-note", "The medical term is selected by the most mentions and matched using its MeSH identifier."));
   box.append(about);
   return box;
 }
@@ -398,4 +402,24 @@ function evidenceExplanation(text) {
     list.append(item);
   });
   return box;
+}
+
+
+function countryName(value) {
+  if (typeof value !== "string" || !value.trim()) return "";
+  const text = value.trim();
+  const aliases = {UK: "GB", USA: "US", "UNITED STATES OF AMERICA": "US"};
+  const code = aliases[text.toUpperCase()] || text.toUpperCase();
+  if (/^[A-Z]{2}$/.test(code)) {
+    try {
+      const name = new Intl.DisplayNames(["en"], {type: "region"}).of(code);
+      if (name && name !== code) return name;
+    } catch (_) {}
+    return code;
+  }
+  // Full names from the API may be upper case. Format them without changing the country.
+  if (text === text.toUpperCase() || text === text.toLowerCase())
+    return text.toLowerCase().replace(/(^|[\s-])([a-z])/g, (_, gap, letter) => gap + letter.toUpperCase())
+      .replace(/\b(Of|And|The)\b/g, word => word.toLowerCase());
+  return text;
 }

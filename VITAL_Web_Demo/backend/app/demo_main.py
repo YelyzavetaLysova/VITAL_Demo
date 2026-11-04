@@ -797,7 +797,7 @@ def start_analysis(identifier, prepared=False, features=None, fresh=False):
 async def health():
     return {
         "status": "ok",
-        "version": "1.19.0",
+        "version": "1.20.0",
         "vital_api_configured": bool(config.vital_api_key),
         "analysis_service": config.vital_api_base,
     }

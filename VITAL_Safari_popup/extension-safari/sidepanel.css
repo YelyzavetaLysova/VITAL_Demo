@@ -1555,3 +1555,19 @@ mark.vital-claim-highlight::after {
 .feedback-privacy { margin: 8px 0; }
 #privacyWithdraw { margin: 8px 0; }
 @media (max-width: 440px) { .privacy-layer { padding: 8px; } .privacy-card { padding: 16px; max-height: calc(100dvh - 16px); font-size: 13px; } .privacy-card h2 { font-size: 20px; } }
+
+/* Explanations of how to read a result are visually separate from the result itself. */
+.summary-card .result-note,
+.insight .result-note,
+.historical-context .result-note {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--muted, #65716c);
+  border-inline-start: 2px solid currentColor;
+  padding-inline-start: 10px;
+  margin: 12px 0 8px;
+  opacity: .88;
+}
+.topic-explanation { margin: 10px 0 4px; line-height: 1.5; }
+.claim-card { overflow-anchor: none; scroll-margin-block-start: 12px; }

@@ -337,7 +337,7 @@ function selectClaim(id) {
     .querySelectorAll(".selected")
     .forEach((item) => item.classList.remove("selected"));
   card.classList.add("selected");
-  card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  requestAnimationFrame(() => card.scrollIntoView({ behavior: "smooth", block: "start" }));
 }
 
 function feedback(feature, claimId = "") {
@@ -443,6 +443,13 @@ function claimCard(claim, index) {
     node("span", "claim-number", String(index + 1).padStart(2, "0")),
     description,
   );
+  // Scroll only on a user opening a card, not when polling restores open cards.
+  summary.addEventListener("click", () => {
+    if (!card.open) requestAnimationFrame(() => {
+      if (card.open && card.isConnected)
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
   card.addEventListener("toggle", () => {
     if (card.open) opened.add(claim.id);
     else opened.delete(claim.id);
@@ -531,7 +538,6 @@ function claimCard(claim, index) {
   body.append(locate);
   if (!["pending", "checking", "skipped"].includes(claim.status))
     body.append(feedback("claim", claim.id));
-  body.append(upcomingSection("Similar claims"));
   card.append(summary, body);
   return card;
 }
@@ -577,7 +583,7 @@ function section(title, feature, rows, note = "") {
     item.append(historicalContext(current.analysis?.article?.historical_insights));
   if (feature === "content_sentiment")
     item.append(framingBars(current.analysis?.article || {}, true));
-  if (note) item.append(node("p", "small muted", note));
+  if (note) item.append(node("p", feature === "topics" ? "topic-explanation" : "result-note", note));
   if (current.analysis?.analysis_id) item.append(feedback(feature));
   return item;
 }

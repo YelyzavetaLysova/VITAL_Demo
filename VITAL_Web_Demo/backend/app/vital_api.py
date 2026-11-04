@@ -3,6 +3,7 @@
 import asyncio
 import hashlib
 import json
+import math
 from datetime import datetime
 from urllib.parse import urlparse
 from uuid import UUID
@@ -108,7 +109,7 @@ class VitalClient:
         }
         self.transport = transport
 
-    async def request(self, method, path, payload=None):
+    async def request(self, method, path, payload=None, allow_list=False):
         async with httpx.AsyncClient(
             timeout=60, transport=self.transport, trust_env=False
         ) as client:
@@ -122,12 +123,19 @@ class VitalClient:
                     "connection",
                 ) from exc
         if not response.is_success:
-            raise response_error(response.status_code)
+            error = response_error(response.status_code)
+            try:
+                detail = response.json().get("detail")
+                if isinstance(detail, str) and detail.strip():
+                    error = VitalApiError(detail, error.code, response.status_code)
+            except (ValueError, AttributeError):
+                pass
+            raise error
         try:
             data = response.json()
         except ValueError as exc:
             raise VitalApiError("VITAL returned an unreadable response.") from exc
-        if not isinstance(data, dict):
+        if not isinstance(data, dict) and not (allow_list and isinstance(data, list)): 
             raise VitalApiError("VITAL returned an unexpected response format.")
         return data
 
@@ -145,6 +153,27 @@ class VitalClient:
         except (ValueError, TypeError) as exc:
             raise VitalApiError("Invalid VITAL analysis identifier.") from exc
         return await self.request("GET", f"/v1/analyses/{identifier}")
+
+    async def create_claim_assessment(self, analysis_id, candidate_index):
+        identifier = str(UUID(str(analysis_id)))
+        if type(candidate_index) is not int or candidate_index < 0:
+            raise VitalApiError("Invalid stored candidate index.")
+        return await self.request(
+            "POST", f"/v1/analyses/{identifier}/claims/{candidate_index}/assessments"
+        )
+
+    async def claim_assessment(self, status_url):
+        # Never forward the API credential to another origin supplied in a URL.
+        from urllib.parse import urljoin
+        url = urljoin(self.base + "/", status_url)
+        parsed, base = urlparse(url), urlparse(self.base)
+        if (parsed.scheme, parsed.netloc) != (base.scheme, base.netloc):
+            raise VitalApiError("Invalid manual assessment status URL.")
+        return await self.request("GET", parsed.path + ("?" + parsed.query if parsed.query else ""))
+
+    async def list_claim_assessments(self, analysis_id):
+        identifier = str(UUID(str(analysis_id)))
+        return await self.request("GET", f"/v1/analyses/{identifier}/claim-assessments", allow_list=True)
 
     async def events(self, analysis_id, after="0-0"):
         """Read authenticated SSE and resume with the server's Redis stream cursor."""
@@ -218,6 +247,24 @@ def result_data(snapshot):
         if isinstance(snapshot.get(key), dict):
             return snapshot[key]
     return snapshot
+
+
+def assessment_coverage(snapshot):
+    """Preserve the API's coverage figures without inferring them from claims."""
+    data = result_data(snapshot)
+    raw = data.get("assessment_coverage", snapshot.get("assessment_coverage"))
+    if not isinstance(raw, dict):
+        return None
+    output = {}
+    for key in ("assessed_claims", "submitted_claims", "unassessed_claims"):
+        value = raw.get(key)
+        if type(value) is int and value >= 0:
+            output[key] = value
+    for key, maximum in (("coverage", 1), ("coverage_percent", 100)):
+        value = raw.get(key)
+        if type(value) in (int, float) and math.isfinite(value) and 0 <= value <= maximum:
+            output[key] = value
+    return output or None
 
 
 def normalise_claim(raw, index):
@@ -307,6 +354,8 @@ def normalise_result(snapshot):
     article = dict(article) if isinstance(article, dict) else {}
     if isinstance(data.get("provider"), dict):
         article["provider"] = dict(data["provider"])
+    if isinstance(data.get("historical_insights"), dict):
+        article["historical_insights"] = data["historical_insights"]
     warnings = data.get("warnings", [])
     warnings = [str(item) for item in warnings] if isinstance(warnings, list) else []
     if (
@@ -427,6 +476,13 @@ def normalise_vital_snapshot(data):
         claim["checkworthiness"] = detected.get("checkworthiness_score")
         claim["verification_selected"] = choice.get("accepted")
         claim["scope_reason"] = choice.get("reason")
+        claim["model_accepted"] = choice.get("accepted")
+        claim["model_category"] = choice.get("category")
+        claim["model_reason"] = choice.get("reason")
+        claim["can_analyze_manually"] = (
+            (choice.get("accepted") is False or str(choice.get("category", "")).strip().lower() == "non-health")
+            and not any(item.get("candidateIndex") == index for item in stances)
+        )
         if choice.get("accepted") is False:
             claim.update(
                 status="skipped",
@@ -524,6 +580,8 @@ def normalise_vital_snapshot(data):
     }
     if isinstance(data.get("provider"), dict):
         article["provider"] = dict(data["provider"])
+    if isinstance(data.get("historical_insights"), dict):
+        article["historical_insights"] = data["historical_insights"]
     unavailable = {
         "advertorial": "Commercial-content analysis is currently unavailable.",
         "transformation": "Article transformation is currently unavailable.",
@@ -570,3 +628,35 @@ def normalise_vital_snapshot(data):
             if transformation.get(field) is not None:
                 article[field] = transformation[field]
     return normalized, article, []
+
+
+def manual_assessment_updates(assessment):
+    """Keep the original filter decision separate from the user-requested verdict."""
+    state = assessment.get("status")
+    updates = {
+        "manual_assessment": assessment,
+        "manual_status": state,
+        "model_accepted": assessment.get("model_accepted"),
+        "model_category": assessment.get("model_category"),
+        "model_reason": assessment.get("model_reason"),
+        "manual_origin": "user_requested",
+    }
+    if state in {"queued", "running"}:
+        updates.update(status="checking", explanation="User-requested analysis is " + state + ".")
+    elif state == "failed":
+        error = assessment.get("error") or {}
+        updates.update(status="error", explanation=api_reason(error) or error.get("errorType") or "Manual assessment failed.")
+    elif state == "complete":
+        raw = assessment.get("result") or {}
+        response = raw.get("response") or raw.get("result") or raw
+        updates.update(
+            status=verdict_status(first_present(response, "finalLabelDescription", "finalLabel", "final_prediction_label", "label", "finalPrediction", "prediction"), response.get("labelMap")),
+            summary=response.get("summary"),
+            advanced_summary=response.get("advancedSummary"),
+            evidence=factiverse_sources(response),
+            explanation=api_reason(response) or "",
+            can_analyze_manually=False,
+        )
+    else:
+        raise VitalApiError("Unknown manual assessment status.")
+    return updates

@@ -12,6 +12,7 @@ if (
 }
 const extensionApi = globalThis.browser || globalThis.chrome;
 let extensionTab;
+let extensionPayload;
 let lastHighlight = "";
 // Extension storage works independently of the publisher iframe storage policy.
 const vitalStorageValues = {};
@@ -64,7 +65,15 @@ async function startExtension() {
       throw new Error(
         "Not enough article text was found. Wait for the article to load and reopen VITAL.",
       );
-    current = await api("/api/widget/articles", payload);
+    extensionPayload = payload;
+    current = {
+      id: null,
+      title: payload.title || "Current article",
+      text: payload.text,
+      url: payload.url,
+      publisher: payload.publisher || "",
+      analysis: null,
+    };
     $("#reader").hidden = false;
     $("#catalogue").hidden = true;
     $("#widget").classList.add("open");
@@ -139,4 +148,12 @@ async function extensionFindMention(term, detail = {}) {
   });
   if (result?.found) extensionClose();
   return result;
+}
+
+// Opening a panel only extracts text locally. Registration and cache lookup
+// happen after an explicit Analyse action and the research-use notice.
+async function registerExtensionArticle() {
+  if (current?.id) return;
+  if (!extensionPayload) throw new Error("Reopen VITAL on the article and try again.");
+  current = await api("/api/widget/articles", extensionPayload);
 }

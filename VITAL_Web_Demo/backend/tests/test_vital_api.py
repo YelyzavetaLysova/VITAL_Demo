@@ -366,3 +366,25 @@ def test_detailed_commercial_and_classification_metadata_is_retained():
     assert article["advertorial"]["prob_advertorial"] == .05
     assert article["advertorial"]["input_tokens"] == 100
     assert article["classification"]["health_related"] is True
+
+
+@pytest.mark.parametrize("wrapper", [None, "result", "cached_result", "results"])
+def test_assessment_coverage_preserves_api_values(wrapper):
+    from app.vital_api import assessment_coverage
+    expected = {"assessed_claims": 7, "submitted_claims": 10,
+                "unassessed_claims": 3, "coverage": 0.7, "coverage_percent": 70.0}
+    data = {"assessment_coverage": expected}
+    assert assessment_coverage({wrapper: data} if wrapper else data) == expected
+
+
+def test_assessment_coverage_keeps_zero_and_does_not_infer_missing_fields():
+    from app.vital_api import assessment_coverage
+    assert assessment_coverage({"assessment_coverage": {
+        "assessed_claims": 0, "submitted_claims": 0, "unassessed_claims": 0,
+        "coverage": 0, "coverage_percent": 0,
+    }}) == {"assessed_claims": 0, "submitted_claims": 0, "unassessed_claims": 0,
+            "coverage": 0, "coverage_percent": 0}
+    assert assessment_coverage({"assessment_coverage": {"assessed_claims": 7}}) == {"assessed_claims": 7}
+    for value in [None, [], "invalid", {"assessed_claims": True, "submitted_claims": -1,
+        "unassessed_claims": "3", "coverage": float("nan"), "coverage_percent": 101}]:
+        assert assessment_coverage({"assessment_coverage": value}) is None

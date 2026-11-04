@@ -53,6 +53,7 @@ const path = require("node:path");
       runScripts: "outside-only",
       virtualConsole: console,
       beforeParse(window) {
+        window.localStorage.setItem("vital-privacy-acknowledgement", JSON.stringify({version:"2026-10-28.1"}));
         window.matchMedia = () => ({ matches: true });
         window.scrollTo = () => {};
         window.HTMLElement.prototype.scrollIntoView = function () {};
@@ -87,7 +88,7 @@ const path = require("node:path");
     fs.readFileSync(path.join(root, "assets/mention-navigation.js"), "utf8"),
   );
   dom.window.eval(
-    ["assets/widget-overview.js", "assets/demo.js"]
+    ["assets/widget-overview.js", "assets/privacy-notice.js", "assets/demo.js"]
       .map((file) => fs.readFileSync(path.join(root, file), "utf8"))
       .join("\n"),
   );

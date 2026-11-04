@@ -41,7 +41,8 @@
             maxlength="3000"
           /><button class="primary" type="submit">Add and analyse</button>
         </div>
-        <p id="addArticleMessage" class="small" role="status"></p>
+        <p class="small muted">Added articles and their analysis are visible to everyone using this website.</p>
+          <p id="addArticleMessage" class="small" role="status"></p>
       </form>
       <p id="catalogueMessage" role="status">Loading articles.</p>
       <div id="stories" class="stories"></div>
@@ -125,6 +126,7 @@
           </div>
           <section data-panel="summary">
             <div id="summaryInsights"></div>
+            <details class="note-details about-results"><summary>About these results</summary><p>This overview combines the results received so far. Missing information may still be processing or unavailable. Source ratings describe the publisher and do not prove the accuracy of an individual article.</p></details>
           </section>
           <section data-panel="claims" hidden>
             <details id="addClaim" class="note-details add-claim">
@@ -155,6 +157,7 @@
               <summary>Analysis notes</summary>
               <div id="notesText"></div>
             </details>
+            <details class="note-details about-results"><summary>About these results</summary><p>Underlined: detected, not verified. Pulsing grey: checking. Grey: insufficient evidence. Green: supported. Red: contradicted. Amber: mixed evidence or context needed. A failed check is a service error, not a verdict. Not Health Claim means it was not selected for automatic health verification; you may request a check. Insufficient evidence does not mean false.</p></details>
           </section>
           <section data-panel="article" hidden>
             <div id="sourceInsights"></div>
@@ -162,6 +165,7 @@
             <div id="articleInsights">
               <p class="muted">Available after analysis.</p>
             </div>
+            <details class="note-details about-results"><summary>About these results</summary><p>Framing describes the tone of the headline and article body, not their truthfulness. Commercial content is a model assessment, not proof of advertising. Source ratings are supplied by the API, including MBFC metadata when available. MeSH identifiers refer to the Medical Subject Headings vocabulary. Names and terms may be detected incorrectly.</p></details>
           </section>
           <section data-panel="settings" hidden>
             <h2>Appearance</h2>
@@ -170,15 +174,15 @@
               <option value="light">Light</option>
               <option value="dark">Dark</option>
             </select>
+
+            <h2>Privacy</h2>
+            <p class="small"><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy and research use</a></p>
+            <p class="small"><a href="mailto:office@mediafutures.no?subject=VITAL%20privacy%20request">Contact MediaFutures</a></p>
+            <p id="privacyStatus" class="small muted" role="status"></p>
+            <button id="privacyWithdraw" type="button">Withdraw agreement</button>
+            <p class="small muted">Stops new submissions from this browser until you agree again. To ask about existing data, contact us.</p>
+            <details class="note-details about-results"><summary>About privacy and storage</summary><p>Appearance and notice acceptance are saved on this browser. A random installation identifier and feedback receipts help avoid duplicate feedback; they are not an account. Optional feedback is stored for research. You can withdraw agreement here or contact MediaFutures about existing data.</p></details>
           </section>
-          <details class="note-details colour-guide">
-            <summary>Colours and results</summary>
-            <p>
-              Underlined: detected. Pulsing grey: checking. Grey: insufficient
-              evidence. Green: supported. Red: contradicted. Amber: mixed
-              evidence or context needed. Check failed: see the claim details.
-            </p>
-          </details>
           <p class="disclaimer">
             Automated assessments can be wrong. Check the sources. Not medical
             advice.
@@ -189,8 +193,24 @@
         VITAL · Open evidence
       </button>
     </main>
+
+    <footer class="site-privacy"><a href="/privacy">Privacy and research use</a> · <a href="mailto:office@mediafutures.no">Contact</a></footer>
+    <div id="privacyNotice" class="privacy-layer" hidden>
+      <section class="privacy-card" role="dialog" aria-modal="true" aria-labelledby="privacyTitle" aria-describedby="privacyDescription">
+        <p class="eyebrow">Before you begin</p>
+        <h2 id="privacyTitle">Using VITAL</h2>
+        <p id="privacyDescription">When you press Analyse, the article title, text and URL are sent to our NREC-hosted service and the VITAL API. Factiverse is used for claim verification when available.</p>
+        <p>Researchers at SFI MediaFutures, University of Bergen, may review submitted articles, results and optional feedback. Identifying information is removed manually before indefinite research storage.</p>
+        <p>No account is required. Please do not include personal information in feedback.</p>
+        <details class="note-details"><summary>What the results mean</summary><p>Automated assessments can be wrong. Insufficient evidence does not mean a claim is false. Check the linked sources. VITAL does not provide medical advice.</p></details>
+        <p><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy and research use</a></p>
+        <p id="privacyNoticeError" class="small" role="status"></p>
+        <div class="privacy-actions"><button id="privacyAccept" class="primary" type="button">Agree and continue</button><button id="privacyDecline" type="button">Not now</button></div>
+      </section>
+    </div>
     <script src="/assets/mention-navigation.js"></script>
     <script src="/assets/widget-overview.js"></script>
+    <script src="/assets/privacy-notice.js"></script>
     <script src="/assets/demo.js"></script>
   </body>
 </html>

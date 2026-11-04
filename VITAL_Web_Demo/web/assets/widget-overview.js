@@ -170,6 +170,27 @@ function claimTotals(analysis) {
   };
 }
 
+function coverageRows(analysis) {
+  // Live counts remain above this section. These figures describe the API's
+  // submitted verification set, which can differ from all detected claims.
+  if (analysis?.phase !== "completed") return [];
+  const coverage = analysis.assessment_coverage;
+  if (!coverage || typeof coverage !== "object") return [];
+  const rows = [];
+  for (const [key, label] of [
+    ["submitted_claims", "Submitted for verification"],
+    ["assessed_claims", "Assessed"],
+    ["unassessed_claims", "Not assessed"],
+  ]) {
+    const value = coverage[key];
+    if (Number.isInteger(value) && value >= 0) rows.push([label, value]);
+  }
+  const value = coverage.coverage_percent;
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100)
+    rows.push(["Coverage", value.toLocaleString(undefined, { maximumFractionDigits: 2 }) + "%"]);
+  return rows;
+}
+
 function renderOverview(analysis) {
   const data = analysis?.article || {};
   const provider = data.provider;
@@ -207,9 +228,8 @@ function renderOverview(analysis) {
       "Tone describes language, not factual accuracy.",
     ],
     [
-      "Category and topic",
+      "Topic and subtopic",
       [
-        ["Category", data.category || unavailable],
         [
           "Topic",
           data.main_topic ||
@@ -230,6 +250,13 @@ function renderOverview(analysis) {
     ],
     ["Claims", countRows],
   ];
+  const coverage = coverageRows(analysis);
+  if (coverage.length)
+    specs.push([
+      "Verification coverage",
+      coverage,
+      "Final API figures for claims submitted for verification. Not assessed does not mean Not Health Claim.",
+    ]);
   const container = document.querySelector("#summaryInsights");
   const fingerprint = JSON.stringify([
     specs,
@@ -268,4 +295,82 @@ function renderOverview(analysis) {
       return card;
     }),
   );
+}
+
+
+function historicalContext(data) {
+  const box = node("div", "historical-context");
+  if (!data || data.status !== "available") {
+    const waiting = ["queued", "running", "pending"].includes(data?.status);
+    box.append(node("p", "small muted", waiting ? "Historical context is being prepared." : "Historical context is unavailable."));
+    return box;
+  }
+  const number = (v) => typeof v === "number" && Number.isFinite(v);
+  const pct = (v) => number(v) ? `${v.toFixed(2)}%` : "Not available";
+  const count = (v) => number(v) ? v.toLocaleString("en-GB") : "Not available";
+  function rows(parent, values) {
+    const dl = node("dl");
+    for (const [label, value] of values) {
+      const row = node("div");
+      row.append(node("dt", "", label), node("dd", "", value));
+      dl.append(row);
+    }
+    parent.append(dl);
+  }
+  function stats(title, value, overall) {
+    const part = node("section");
+    part.style.marginBlock = "16px";
+    part.append(node("h3", "", title));
+    if (!value || value.status !== "available") {
+      part.append(node("p", "small muted", "Not available"));
+      box.append(part);
+      return;
+    }
+    part.append(node("p", "", `${pct(value.support_percent)} Supported`));
+    part.append(node("p", "small muted", "Among assessed claims in this historical group."));
+    rows(part, [
+      ["Dataset overall", pct(value.overall_support_percent ?? overall?.support_percent)],
+      ["Articles", count(value.total_articles)],
+      ["Assessed claims", count(value.assessed_claims)],
+      ["Submitted claims", count(value.submitted_claims)],
+      ["Assessment coverage", pct(value.assessment_coverage_percent)],
+    ]);
+    const difference = value.difference_percentage_points;
+    if (number(difference)) part.append(node("p", "small", difference === 0
+      ? "Same support percentage as the dataset overall."
+      : `${Math.abs(difference).toFixed(2)} percentage points ${difference > 0 ? "higher" : "lower"} than the dataset overall.`));
+    box.append(part);
+    return part;
+  }
+  stats(`Medical term${data.medical_term?.name ? ": " + data.medical_term.name : ""}`, data.medical_term, data.overall);
+  const code = data.country?.country;
+  let country = code;
+  try { if (code) country = new Intl.DisplayNames(["en"], {type: "region"}).of(code); } catch (_) {}
+  const countryPart = stats(`Country${country ? ": " + country : ""}`, data.country, data.overall);
+  if (countryPart) countryPart.append(node("p", "small muted", "Country refers to the publisher."));
+  const peer = data.country?.peer_comparison;
+  if (countryPart && peer?.status === "available") {
+    const details = node("details", "note-details");
+    details.append(node("summary", "", "Compare with other countries"));
+    rows(details, (peer.country_statistics || []).map(v => [v.country, `${pct(v.support_percent)} Supported`]));
+    rows(details, [["Comparison average", pct(peer.support_percent)]]);
+    details.append(node("p", "small muted", "Each comparison country has equal weight. This differs from pooling all assessed claims."));
+    countryPart.append(details);
+  }
+  const about = node("details", "note-details");
+  about.append(node("summary", "", "About the dataset"));
+  const dataset = data.dataset || {};
+  const date = v => v ? String(v).slice(0, 10) : "Not available";
+  rows(about, [
+    ["Dataset", dataset.name || "Not available"], ["Version", dataset.version || "Not available"],
+    ["Articles", count(dataset.total_articles)],
+    ["Publication dates", `${date(dataset.first_published_at)} to ${date(dataset.last_published_at)}`],
+    ["Overall assessment coverage", pct(data.overall?.assessment_coverage_percent)],
+  ]);
+  if (data.medical_term?.mesh_id) rows(about, [["MeSH", data.medical_term.mesh_id]]);
+  about.append(node("p", "small muted", "Supported means the share of assessed claims labelled SUPPORTS. Unassessed claims are not counted as unsupported. The overall comparison includes this group. This selected dataset does not represent all news."));
+  if (data.methodology?.primary_term_method === "most_mentions_mesh_v1")
+    about.append(node("p", "small muted", "The medical term is selected by the most mentions and matched using its MeSH identifier."));
+  box.append(about);
+  return box;
 }

@@ -9,6 +9,7 @@ class CoordinatorProgress:
         self.stances = {}
         self.classification = {}
         self.advertorial = None
+        self.historical_insights = None
         self.transformation = {}
         self.errors = []
         self.total = None
@@ -55,6 +56,13 @@ class CoordinatorProgress:
                 self.candidates[index] = {"text": payload["claim"]}
                 self.stances[index] = payload
             self.message = f"Checked {len(self.stances)} claims."
+        elif kind == "historical_insights.completed":
+            if isinstance(payload.get("result"), dict):
+                self.historical_insights = payload["result"]
+            self.message = "Historical context received."
+        elif kind == "historical_insights.failed":
+            self.historical_insights = {"status": "unavailable"}
+            self.message = "Historical context is unavailable."
         elif kind == "advertorial.completed":
             self.advertorial = payload.get("result")
             self.message = "Commercial-content result received."
@@ -93,6 +101,7 @@ class CoordinatorProgress:
                 "classification": self.classification,
                 "stanceResults": list(self.stances.values()),
             },
+            "historical_insights": self.historical_insights,
             "advertorial_result": self.advertorial,
             "transformation_result": self.transformation,
             "error": {"errors": self.errors},

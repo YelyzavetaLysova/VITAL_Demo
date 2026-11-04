@@ -1,4 +1,4 @@
-# VITAL Safari popup 1.13.0
+# VITAL Safari popup 1.15.0
 
 Remove the old temporary VITAL from Safari Settings > Extensions. Keep older installed copies disabled. Open Settings > Developer > Add Temporary Extension, select extension-safari from this folder, and refresh the article.
 
@@ -11,3 +11,7 @@ For Xcode or iPhone/iPad simulator testing, run `python3 build_safari.py` on you
 Uses https://vital.demo.mediafutures.no. Update VITAL_Web_Demo on the server before loading. No API secret is stored in this extension. The central API remains unchanged.
 
 Automated DOM tests are included; real macOS/iOS/iPadOS testing is still needed before public distribution.
+
+## Privacy update
+
+The extension asks for notice acceptance before submission. Opening it does not upload article text; press Analyse to submit or retrieve an identical cached article. Settings contains privacy information and withdrawal. See ../PUBLICATION.md for tester distribution and ../README.md for release notes. The privacy page is included offline in the extension. No backend secrets are included here.

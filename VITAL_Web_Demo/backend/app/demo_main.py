@@ -30,6 +30,8 @@ from .vital_api import (
     VitalClient,
     VitalApiError,
     normalise_result,
+    manual_assessment_updates,
+    assessment_coverage,
     result_status,
     submission_payload,
 )
@@ -52,6 +54,7 @@ class DemoConfig(BaseSettings):
 
 config = DemoConfig()
 store = DemoStore(config.demo_database)
+manual_restore_times = {}
 web = Path(__file__).resolve().parents[2] / "web"
 media = Path(config.demo_database).resolve().parent / "media"
 media.mkdir(parents=True, exist_ok=True)
@@ -274,6 +277,10 @@ def public_article(article, listing=False):
                         article_info[key] = value
                     elif isinstance(value, dict) and isinstance(article_info[key], dict):
                         article_info[key] = {**value, **article_info[key]}
+            canonical, _, _ = normalise_result(analysis.get("server_response") or {})
+            metadata = {item["id"]: {key: item.get(key) for key in (
+                "candidate_index", "can_analyze_manually", "model_accepted", "model_category", "model_reason"
+            )} for item in canonical}
             result["analysis"] = {
                 **{
                     key: value
@@ -286,11 +293,17 @@ def public_article(article, listing=False):
                     }
                 },
                 "article": article_info,
+                "assessment_coverage": (
+                    analysis.get("assessment_coverage")
+                    or assessment_coverage(analysis.get("server_response") or {})
+                    if analysis.get("phase") == "completed"
+                    else None
+                ),
                 "claims": [
                     {
-                        key: value
-                        for key, value in claim.items()
-                        if key not in {"factiverse", "remote_analysis_id"}
+                        **metadata.get(claim["id"], {}),
+                        **{key: value for key, value in claim.items()
+                           if key not in {"factiverse", "remote_analysis_id", "manual_assessment"}},
                     }
                     for claim in analysis.get("claims", [])
                 ],
@@ -399,7 +412,7 @@ async def fetch_remote_result(
             await asyncio.gather(stream_task, return_exceptions=True)
 
 
-async def verify_claim(identifier, claim_id):
+async def verify_selected_passage(identifier, claim_id):
     record = store.get(identifier)
     if not record or not record["analysis"]:
         return
@@ -470,6 +483,90 @@ async def verify_claim(identifier, claim_id):
             "text": claim["text"],
             "remote_analysis_id": remote_id,
         }
+    except Exception as exc:
+        print(
+            f"VITAL passage request error: {str(exc) if isinstance(exc, VitalApiError) else type(exc).__name__}"
+        )
+        updates = {
+            "status": "error",
+            "status_label": "Check failed",
+            "explanation": (
+                str(exc)
+                if isinstance(exc, VitalApiError)
+                else "The passage check could not finish. The server did not provide a reason."
+            ),
+            "error": True,
+        }
+    modify(identifier, lambda current: set_claim(current, updates))
+
+
+async def verify_claim(identifier, claim_id):
+    record = store.get(identifier)
+    if not record or not record["analysis"]:
+        return
+    analysis_id = record["analysis"]["analysis_id"]
+    claim = next(
+        (item for item in record["analysis"]["claims"] if item["id"] == claim_id), None
+    )
+    # Older databases predate the eligibility fields. Recover them from the immutable snapshot.
+    if claim and "can_analyze_manually" not in claim:
+        canonical, _, _ = normalise_result(record["analysis"].get("server_response") or {})
+        original = next((item for item in canonical if item["id"] == claim_id), None)
+        if original:
+            for field in ("candidate_index", "can_analyze_manually", "model_accepted", "model_category", "model_reason"):
+                claim[field] = original.get(field)
+    if claim and claim.get("origin") == "user_selected":
+        return await verify_selected_passage(identifier, claim_id)
+    if not claim or claim.get("status") not in {"pending", "skipped", "error"} or claim.get("manual_status") == "complete":
+        return
+    if not claim.get("can_analyze_manually"):
+        raise HTTPException(409, "Only stored claims rejected by the health filter without an automatic assessment can use Analyse anyway.")
+    remote_id = record["analysis"].get("remote_analysis_id")
+    candidate_index = claim.get("candidate_index")
+    if not remote_id or type(candidate_index) is not int:
+        raise HTTPException(409, "This claim has no stored API candidate. Analyse the article again to obtain its candidate index.")
+
+    def set_claim(current, updates):
+        if not current or current["analysis_id"] != analysis_id:
+            return current
+        for item in current["claims"]:
+            if item["id"] == claim_id:
+                item.update(updates)
+        current["updated_at"] = now()
+        return current
+
+    modify(
+        identifier,
+        lambda current: set_claim(
+            current,
+            {
+                "status": "checking",
+                "explanation": "The VITAL server is analysing this passage.",
+            },
+        ),
+    )
+    try:
+        client = vital_client()
+        # Recover an existing assessment before creating one; POST is also idempotent upstream.
+        assessment = claim.get("manual_assessment")
+        if not assessment:
+            existing = await client.list_claim_assessments(remote_id)
+            assessment = next((item for item in existing if item.get("candidate_index") == candidate_index), None)
+        if not assessment:
+            assessment = await client.create_claim_assessment(remote_id, candidate_index)
+        deadline = time.monotonic() + config.vital_result_timeout_seconds
+        while True:
+            if assessment.get("analysis_id") != remote_id or assessment.get("candidate_index") != candidate_index:
+                raise VitalApiError("Manual assessment does not match the stored claim.")
+            updates = manual_assessment_updates(assessment)
+            modify(identifier, lambda current: set_claim(current, updates))
+            if assessment.get("status") not in {"queued", "running"}:
+                break
+            if time.monotonic() >= deadline:
+                raise VitalApiError("The manual assessment is still processing. Retry to retrieve the same assessment.")
+            await asyncio.sleep(config.vital_poll_interval_seconds)
+            assessment = await client.claim_assessment(assessment["status_url"])
+
     except Exception as exc:
         print(
             f"VITAL passage request error: {str(exc) if isinstance(exc, VitalApiError) else type(exc).__name__}"
@@ -573,6 +670,11 @@ async def run_analysis(identifier, prepared=False, features=None):
                     prepared_features=features,
                     remote_status=status,
                     server_response=snapshot,
+                    assessment_coverage=(
+                        assessment_coverage(snapshot)
+                        if status in {"complete", "partial"}
+                        else None
+                    ),
                     message=(
                         (
                             current.get("message")
@@ -607,7 +709,10 @@ async def run_analysis(identifier, prepared=False, features=None):
                     current["claims"] = claims
                 if article:
                     if status in {"complete", "partial"}:
+                        historical = current.get("article", {}).get("historical_insights")
                         current["article"] = article
+                        if historical is not None and "historical_insights" not in article:
+                            current["article"]["historical_insights"] = historical
                     else:
                         current["article"] = {
                             **current.get("article", {}),
@@ -689,7 +794,7 @@ def start_analysis(identifier, prepared=False, features=None):
 async def health():
     return {
         "status": "ok",
-        "version": "1.13.0",
+        "version": "1.18.0",
         "vital_api_configured": bool(config.vital_api_key),
         "analysis_service": config.vital_api_base,
     }
@@ -699,6 +804,11 @@ async def health():
 @app.get("/article/{identifier}")
 async def home(identifier: str = ""):
     return FileResponse(web / "index.html")
+
+
+@app.get("/privacy", include_in_schema=False)
+async def privacy_page():
+    return FileResponse(web / "privacy.html")
 
 
 @app.get("/admin")
@@ -936,7 +1046,31 @@ async def articles():
 
 @app.get("/api/demo/articles/{identifier}")
 async def article(identifier: str):
-    return public_article(article_record(identifier))
+    record = article_record(identifier)
+    analysis = record.get("analysis") or {}
+    remote_id = analysis.get("remote_analysis_id")
+    # Reloads recover manual assessments from the API, including work requested in another session.
+    if (remote_id and analysis.get("phase") == "completed"
+            and time.monotonic() - manual_restore_times.get(remote_id, float("-inf")) > 30):
+        manual_restore_times[remote_id] = time.monotonic()
+        try:
+            assessments = await vital_client().list_claim_assessments(remote_id)
+            def restore(current):
+                if not current or current.get("remote_analysis_id") != remote_id:
+                    return current
+                for assessment in assessments:
+                    if assessment.get("analysis_id") != remote_id:
+                        continue
+                    for claim in current.get("claims", []):
+                        if claim.get("candidate_index") == assessment.get("candidate_index"):
+                            claim.update(manual_assessment_updates(assessment))
+                return current
+            modify(identifier, restore)
+            record = article_record(identifier)
+        except VitalApiError as exc:
+            # An unavailable manual endpoint must not hide the article or its automatic results.
+            print(f"VITAL manual assessment restore: {exc}")
+    return public_article(record)
 
 
 @app.post("/api/demo/articles/{identifier}/analyse")
@@ -994,6 +1128,8 @@ async def add_claim(identifier: str, body: ManualClaim):
     identifier_claim = uuid4().hex[:12]
     candidate = {
         "id": identifier_claim,
+        "origin": "user_selected",
+        "can_analyze_manually": True,
         "text": normalized,
         "theme": record["theme"],
         "status": "pending",

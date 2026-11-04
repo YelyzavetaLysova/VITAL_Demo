@@ -128,7 +128,7 @@
           skipped: "Not Health Claim",
           checking: "Checking",
           supported: "Supported",
-          contradicted: "Contradicted",
+          contradicted: "Refuted",
           mixed: "Mixed evidence",
           context_needed: "Context needed",
           insufficient: "Insufficient evidence",

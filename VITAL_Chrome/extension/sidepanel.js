@@ -17,8 +17,14 @@ function newClientId() {
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
 }
-const clientId = localStorage.getItem("vital-demo-client") || newClientId();
-localStorage.setItem("vital-demo-client", clientId);
+let clientId = localStorage.getItem("vital-demo-client") || "";
+function feedbackClientId() {
+  if (!clientId) {
+    clientId = newClientId();
+    localStorage.setItem("vital-demo-client", clientId);
+  }
+  return clientId;
+}
 const savedFeedback = JSON.parse(
   localStorage.getItem("vital-demo-feedback") || "{}",
 );
@@ -28,7 +34,7 @@ const labels = {
   not_health_claim: "Not Health Claim",
   checking: "Checking",
   supported: "Supported",
-  contradicted: "Contradicted",
+  contradicted: "Refuted",
   mixed: "Mixed evidence",
   context_needed: "Context needed",
   insufficient: "Insufficient evidence",
@@ -44,6 +50,8 @@ function node(tag, className = "", text = "") {
 
 let demoEnded = false;
 async function api(path, body) {
+  if (body !== undefined && !(await vitalPrivacy.ensure()))
+    throw new Error("Nothing was submitted. Accept the notice to continue.");
   if (demoEnded) throw new Error("This demo has ended.");
   const response = await fetch(
     VITAL_BACKEND_URL.replace(/\/$/, "") + "/demo-api/v1" + path,
@@ -391,18 +399,21 @@ function feedback(feature, claimId = "") {
   send.className = "feedback-send";
   send.type = "submit";
   send.textContent = "Send feedback";
-  form.append(question, choices, comment, send, message);
+  const disclosure = node("p", "small muted feedback-privacy",
+    "Optional. Researchers may review your rating and comment to evaluate VITAL. Do not include personal information.");
+  form.append(question, choices, comment, disclosure, send, message);
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!rating && !comment.value.trim()) {
       message.textContent = "Choose an answer or leave a comment.";
       return;
     }
+    if (!(await vitalPrivacy.ensure())) return;
     send.disabled = true;
     try {
       await api(`/api/demo/articles/${current.id}/feedback`, {
         analysis_id: current.analysis.analysis_id,
-        client_id: clientId,
+        client_id: feedbackClientId(),
         feature,
         claim_id: claimId,
         rating: rating || "comment",
@@ -456,13 +467,19 @@ function claimCard(claim, index) {
   });
   const body = node("div", "claim-detail");
   if (claim.explanation) body.append(node("p", "", claim.explanation));
+  if (claim.model_accepted === false || String(claim.model_category || "").toLowerCase() === "non-health") {
+    body.append(node("p", "small muted", "Rejected by health filter"));
+    if (claim.model_reason) body.append(node("p", "small muted", claim.model_reason));
+  }
+  if (claim.manual_origin === "user_requested")
+    body.append(node("p", "small muted", "User-requested analysis"));
   if (claim.api_error_type)
     body.append(node("p", "small muted", `API error: ${claim.api_error_type}`));
-  if (["pending", "error", "skipped"].includes(claim.status)) {
+  if (claim.can_analyze_manually && ["pending", "error", "skipped"].includes(claim.status)) {
     const analyse = node(
       "button",
       "primary analyse-claim",
-      claim.status === "error" ? "Retry analysis" : "Analyse claim",
+      claim.origin === "user_selected" ? "Analyse claim" : (claim.status === "error" ? "Resume assessment" : "Analyse anyway"),
     );
     analyse.type = "button";
     analyse.disabled = current.analysis.phase !== "completed";
@@ -574,6 +591,8 @@ function section(title, feature, rows, note = "") {
     list.append(row);
   });
   item.append(list);
+  if (feature === "historical_insights")
+    item.append(historicalContext(current.analysis?.article?.historical_insights));
   if (feature === "content_sentiment")
     item.append(framingBars(current.analysis?.article || {}, true));
   if (note) item.append(node("p", "small muted", note));
@@ -593,13 +612,12 @@ function renderInsights(analysis) {
   const data = analysis.article || {};
   const specs = [];
   const topicRows = [
-    ["Category", data.category],
     ["Topic", data.main_topic],
     ["Subtopic", data.descriptive_topic],
   ].filter((row) => row[1] != null && row[1] !== "");
   if (topicRows.length)
     specs.push([
-      "Category and topics",
+      "Topic and subtopic",
       "topics",
       topicRows,
       data.topic_reason || data.classification?.category_reason || "",
@@ -683,6 +701,8 @@ function renderInsights(analysis) {
       medical.length ? medical : [["Result", "None detected"]],
       "MeSH identifies terms in the Medical Subject Headings vocabulary. These are terminology references, not diagnoses.",
     ]);
+  if (data.historical_insights && typeof data.historical_insights === "object")
+    specs.push(["Historical context", "historical_insights", [], "These figures describe historical claims assessed by VITAL. They are not a truthfulness score for this article."]);
   if (typeof data.word_count === "number")
     specs.push(["Word count", "word_count", [["Words", data.word_count]]]);
   function reconcile(container, sections) {
@@ -699,6 +719,7 @@ function renderInsights(analysis) {
       const previous = old.get(spec[1]);
       const fingerprint = JSON.stringify([
         spec,
+        spec[1] === "historical_insights" ? data.historical_insights : null,
         spec[1] === "content_sentiment"
           ? [data.title_sentiment, data.content_sentiment]
           : null,
@@ -1030,13 +1051,18 @@ document
 $("#openWidget").addEventListener("click", showWidget);
 $("#closeWidget").addEventListener("click", closeWidget);
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeWidget();
+  if (event.key === "Escape" && !document.body.classList.contains("privacy-open")) closeWidget();
 });
 $("#analyse").addEventListener("click", async () => {
   $("#analyse").disabled = true;
   $("#errorMessage").hidden = true;
   const expectedRoute = routeNumber;
   try {
+    if (!(await vitalPrivacy.ensure())) {
+      $("#analyse").disabled = false;
+      return;
+    }
+    await registerExtensionArticle();
     await api(`/api/demo/articles/${current.id}/analyse`, {});
     await refreshArticle(expectedRoute);
     poll();
@@ -1065,6 +1091,10 @@ $("#useSelection").addEventListener("click", () => {
 $("#manualForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
+    if (!current?.id || !current.analysis) {
+      $("#manualMessage").textContent = "Analyse the article before adding a claim.";
+      return;
+    }
     const result = await api(`/api/demo/articles/${current.id}/claims`, {
       text: $("#claimText").value,
     });
@@ -1084,3 +1114,10 @@ $("#theme").addEventListener("change", () => {
   localStorage.setItem("vital-demo-theme", $("#theme").value);
 });
 startExtension();
+
+document.addEventListener("vital-privacy-withdrawn", () => {
+  clearTimeout(pollTimer);
+  clearTimeout(catalogueTimer);
+});
+
+vitalPrivacy.ensure();

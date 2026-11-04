@@ -255,6 +255,7 @@ async def test_service_error_is_not_insufficient_evidence(demo, monkeypatch):
             "claims": [
                 {
                     "id": "claim-1",
+                    "origin": "user_selected",
                     "text": "A claim to verify.",
                     "status": "pending",
                     "evidence": [],
@@ -677,3 +678,46 @@ def test_demo_extension_switch_preserves_website(demo, monkeypatch):
             assert response.json()["code"] == "demo_ended"
         assert client.get("/api/demo/articles").status_code == 200
         assert client.get("/health").status_code == 200
+
+
+def test_public_privacy_page_is_accessible_without_login(demo):
+    with TestClient(demo.app) as client:
+        response = client.get('/privacy')
+    assert response.status_code == 200
+    assert 'office@mediafutures.no' in response.text
+    assert 'manually' in response.text
+    assert 'No account is required' in response.text
+    assert response.headers['X-Content-Type-Options'] == 'nosniff'
+
+
+def test_final_cached_coverage_reaches_public_response_without_raw_diagnostics(demo):
+    coverage = {"assessed_claims": 7, "submitted_claims": 10, "unassessed_claims": 3,
+                "coverage": 0.7, "coverage_percent": 70.0}
+    record = article_data()
+    record["analysis"] = {"phase": "completed", "claims": [], "article": {},
+                          "server_response": {"status": "partial", "assessment_coverage": coverage}}
+    result = demo.public_article(record)["analysis"]
+    assert result["assessment_coverage"] == coverage
+    assert "server_response" not in result
+    record["analysis"]["phase"] = "checking"
+    assert demo.public_article(record)["analysis"]["assessment_coverage"] is None
+    del record["analysis"]["server_response"]["assessment_coverage"]
+    record["analysis"]["phase"] = "completed"
+    assert demo.public_article(record)["analysis"]["assessment_coverage"] is None
+
+
+@pytest.mark.asyncio
+async def test_api_final_coverage_is_stored_with_completed_analysis(demo, monkeypatch):
+    coverage = {"assessed_claims": 7, "submitted_claims": 10,
+                "unassessed_claims": 3, "coverage": 0.7, "coverage_percent": 70.0}
+    class Complete:
+        async def submit(self, payload):
+            return {"analysis_id": "d04aa3c8-6aaf-4dd4-ac97-96eae005114e", "status": "queued"}
+        async def snapshot(self, identifier):
+            return {"status": "partial", "assessment_coverage": coverage, "claims": [], "article": {}}
+    monkeypatch.setattr(demo, "vital_client", lambda: Complete())
+    record = demo.store.save(article_data())
+    await demo.run_analysis(record["id"])
+    result = demo.public_article(demo.store.get(record["id"]))["analysis"]
+    assert result["phase"] == "completed"
+    assert result["assessment_coverage"] == coverage

@@ -797,7 +797,7 @@ def start_analysis(identifier, prepared=False, features=None, fresh=False):
 async def health():
     return {
         "status": "ok",
-        "version": "1.20.0",
+        "version": "1.21.0",
         "vital_api_configured": bool(config.vital_api_key),
         "analysis_service": config.vital_api_base,
     }
@@ -981,7 +981,7 @@ def prepared_results(claims, article, features):
     }
 
 
-@app.post("/api/demo/import")
+@app.post("/api/demo/import", dependencies=[Depends(organizer)])
 async def visitor_import(body: URLInput):
     try:
         data = await import_article(body.url, media)

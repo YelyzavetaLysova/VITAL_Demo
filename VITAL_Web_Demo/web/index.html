@@ -8,7 +8,7 @@
     />
     <meta name="color-scheme" content="light dark" />
     <title>VITAL powered by factiverse</title>
-    <link rel="stylesheet" href="/assets/demo.css" />
+    <link rel="stylesheet" href="/assets/demo.css?v=1.21.0" />
   </head>
   <body>
     <header class="site-header">
@@ -30,20 +30,6 @@
         <h1>News</h1>
         <p>Selected stories</p>
       </div>
-      <form id="addArticleForm" class="add-article-form">
-        <label for="addArticleUrl">Add an article</label>
-        <div class="url-row">
-          <input
-            id="addArticleUrl"
-            type="url"
-            placeholder="https://..."
-            required
-            maxlength="3000"
-          /><button class="primary" type="submit">Add and analyse</button>
-        </div>
-        <p class="small muted">Added articles and their analysis are visible to everyone using this website.</p>
-          <p id="addArticleMessage" class="small" role="status"></p>
-      </form>
       <p id="catalogueMessage" role="status">Loading articles.</p>
       <div id="stories" class="stories"></div>
       <p class="catalogue-note">
@@ -208,9 +194,9 @@
         <div class="privacy-actions"><button id="privacyAccept" class="primary" type="button">Agree and continue</button><button id="privacyDecline" type="button">Not now</button></div>
       </section>
     </div>
-    <script src="/assets/mention-navigation.js"></script>
-    <script src="/assets/widget-overview.js"></script>
-    <script src="/assets/privacy-notice.js"></script>
-    <script src="/assets/demo.js"></script>
+    <script src="/assets/mention-navigation.js?v=1.21.0"></script>
+    <script src="/assets/widget-overview.js?v=1.21.0"></script>
+    <script src="/assets/privacy-notice.js?v=1.21.0"></script>
+    <script src="/assets/demo.js?v=1.21.0"></script>
   </body>
 </html>

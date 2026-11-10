@@ -1426,3 +1426,15 @@ mark.vital-claim-highlight::after {
 }
 .topic-explanation { margin: 10px 0 4px; line-height: 1.5; }
 .claim-card { overflow-anchor: none; scroll-margin-block-start: 12px; }
+
+/* One evidence source at a time; controls stay outside the changing content. */
+.evidence-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0; }
+.evidence-controls[hidden] { display:none; }
+.evidence-arrow { min-width:44px; min-height:44px; font-size:22px; border:1px solid currentColor; border-radius:8px; background:transparent; color:inherit; cursor:pointer; }
+.evidence-arrow:disabled { opacity:.3; cursor:default; }
+.evidence-counter { font-size:14px; font-variant-numeric:tabular-nums; }
+.evidence-open { display:inline-block; margin-top:8px; }
+.claim-wording[role="button"] { cursor:pointer; }
+.claim-wording[role="button"]:hover { text-decoration:underline; text-underline-offset:3px; }
+.claim-wording[role="button"]:focus-visible { outline:2px solid currentColor; outline-offset:3px; border-radius:3px; }
+.claim-navigation-note { font-weight:normal; }

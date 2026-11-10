@@ -429,6 +429,66 @@ function upcomingSection(title) {
   return block;
 }
 
+const evidencePositions = new Map();
+function evidenceCarousel(claim) {
+  const sources = claim.evidence || [];
+  const carousel = node("section", "evidence-carousel");
+  carousel.setAttribute("aria-label", "Evidence sources");
+  const controls = node("div", "evidence-controls");
+  const previous = node("button", "evidence-arrow", "←");
+  const next = node("button", "evidence-arrow", "→");
+  previous.type = next.type = "button";
+  previous.setAttribute("aria-label", "Previous evidence source");
+  next.setAttribute("aria-label", "Next evidence source");
+  const counter = node("span", "evidence-counter");
+  counter.setAttribute("aria-live", "polite");
+  controls.append(previous, counter, next);
+  const viewport = node("div", "evidence-viewport");
+  carousel.append(controls, viewport);
+  const key = `${current?.id || ""}:${claim.id}`;
+  let index = Math.min(evidencePositions.get(key) || 0, sources.length - 1);
+  function show(position) {
+    index = Math.max(0, Math.min(position, sources.length - 1));
+    evidencePositions.set(key, index);
+    counter.textContent = `${index + 1} of ${sources.length}`;
+    previous.disabled = index === 0;
+    next.disabled = index === sources.length - 1;
+    viewport.replaceChildren();
+    const evidence = sources[index];
+    const block = node("div", "evidence");
+    const title = node(safeLink(evidence.url) ? "a" : "strong", "", evidence.title || "Evidence source");
+    if (safeLink(evidence.url)) {
+      title.href = evidence.url;
+      title.target = "_blank";
+      title.rel = "noopener noreferrer";
+    }
+    block.append(title, node("p", "source-meta", [evidence.publisher, dateLabel(evidence.date), evidence.stance].filter(Boolean).join(" · ")),
+      node("p", "", evidence.passage || "Open the source to read the evidence."));
+    if (safeLink(evidence.url)) {
+      const link = node("a", "evidence-open", "Open source ↗");
+      link.href = evidence.url; link.target = "_blank"; link.rel = "noopener noreferrer";
+      block.append(link);
+    }
+    viewport.append(block);
+  }
+  previous.addEventListener("click", () => show(index - 1));
+  next.addEventListener("click", () => show(index + 1));
+  let touchStart;
+  viewport.addEventListener("touchstart", event => {
+    if (event.touches.length === 1) touchStart = {x:event.touches[0].clientX, y:event.touches[0].clientY};
+  }, {passive:true});
+  viewport.addEventListener("touchend", event => {
+    if (!touchStart || !event.changedTouches.length) return;
+    const dx = event.changedTouches[0].clientX - touchStart.x;
+    const dy = event.changedTouches[0].clientY - touchStart.y;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) show(index + (dx < 0 ? 1 : -1));
+    touchStart = null;
+  }, {passive:true});
+  controls.hidden = sources.length < 2;
+  show(index);
+  return carousel;
+}
+
 function claimCard(claim, index) {
   const card = node("details", "claim-card");
   card.dataset.claim = claim.id;
@@ -443,6 +503,29 @@ function claimCard(claim, index) {
     node("span", "claim-number", String(index + 1).padStart(2, "0")),
     description,
   );
+  const wording = description.querySelector(".claim-wording");
+  wording.setAttribute("role", "button");
+  wording.tabIndex = 0;
+  wording.title = "Find this claim in the article";
+  const passageNote = node("p", "small result-note claim-navigation-note");
+  passageNote.hidden = true;
+  async function navigateClaim(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      const found = await focusPassage(claim.id, true);
+      passageNote.hidden = Boolean(found);
+      passageNote.textContent = found ? "" : "Could not find this passage in the article.";
+    } catch {
+      passageNote.hidden = false;
+      passageNote.textContent = "Could not find this passage in the article.";
+    }
+  }
+  wording.addEventListener("click", navigateClaim);
+  wording.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") navigateClaim(event);
+  });
+  description.append(passageNote);
   // Scroll only on a user opening a card, not when polling restores open cards.
   summary.addEventListener("click", () => {
     if (!card.open) requestAnimationFrame(() => {
@@ -492,35 +575,7 @@ function claimCard(claim, index) {
       body.append(
         node("p", "small muted", "No evidence sources were returned."),
       );
-    for (const evidence of claim.evidence || []) {
-      const block = node("div", "evidence");
-      const title = node(
-        safeLink(evidence.url) ? "a" : "strong",
-        "",
-        evidence.title || "Evidence source",
-      );
-      if (safeLink(evidence.url)) {
-        title.href = evidence.url;
-        title.target = "_blank";
-        title.rel = "noopener noreferrer";
-      }
-      block.append(
-        title,
-        node(
-          "p",
-          "source-meta",
-          [evidence.publisher, dateLabel(evidence.date), evidence.stance]
-            .filter(Boolean)
-            .join(" · "),
-        ),
-        node(
-          "p",
-          "",
-          evidence.passage || "Open the source to read the evidence.",
-        ),
-      );
-      body.append(block);
-    }
+    if (claim.evidence?.length) body.append(evidenceCarousel(claim));
     if (readable(claim.suggested_fix)) {
       const fix = node("details");
       fix.append(
@@ -791,10 +846,10 @@ function renderAnalysis() {
   const isRunning =
     analysis &&
     ["detecting", "checking", "classifying"].includes(analysis.phase);
-  $("#analyseIntro").hidden = Boolean(isRunning);
+  $("#analyseIntro").hidden = Boolean(isRunning || analysis?.phase === "completed");
   $("#analyse").disabled = Boolean(isRunning);
   $("#analyse").textContent =
-    analysis?.phase === "completed" ? "Analyse again" : (analysis?.phase === "interrupted" ? "Resume analysis" : "Analyse");
+    analysis?.phase === "interrupted" ? "Resume analysis" : "Analyse";
   $("#progress").hidden = !isRunning && checking.size === 0;
   $("#progressText").textContent =
     analysis?.remote_status === "queued"
@@ -994,26 +1049,6 @@ async function refreshCatalogue() {
   catalogueTimer = setTimeout(refreshCatalogue, 5000);
 }
 
-$("#addArticleForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const button = $("#addArticleForm button");
-  button.disabled = true;
-  $("#addArticleMessage").textContent = "Importing article.";
-  try {
-    const result = await api("/api/demo/import", {
-      url: $("#addArticleUrl").value,
-    });
-    $("#addArticleMessage").textContent =
-      result.warnings?.join(" ") || "Added. Analysis started.";
-    $("#addArticleUrl").value = "";
-    stories = await api("/api/demo/articles");
-    renderCatalogue();
-  } catch (error) {
-    $("#addArticleMessage").textContent = error.message;
-  } finally {
-    button.disabled = false;
-  }
-});
 
 function navigate(url) {
   history.pushState({}, "", url);
@@ -1042,7 +1077,7 @@ $("#analyse").addEventListener("click", async () => {
   $("#errorMessage").hidden = true;
   const expectedRoute = routeNumber;
   try {
-    await api(`/api/demo/articles/${current.id}/analyse${current.analysis?.phase === "completed" ? "?again=true" : ""}`, {});
+    await api(`/api/demo/articles/${current.id}/analyse`, {});
     await refreshArticle(expectedRoute);
     poll();
   } catch (error) {

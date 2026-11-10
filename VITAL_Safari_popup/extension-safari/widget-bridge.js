@@ -111,12 +111,13 @@ async function extensionHighlight(claims) {
   }
 }
 async function extensionFocus(claimId) {
-  await extensionApi.tabs.sendMessage(extensionTab, {
-    type: "VITAL_FOCUS_CLAIM",
-    claimId,
+  const result = await extensionApi.tabs.sendMessage(extensionTab, {
+    type: "VITAL_FOCUS_CLAIM", claimId,
   });
-  extensionClose();
+  if (result?.found) { extensionClose(); }
+  return Boolean(result?.found);
 }
+
 function extensionClose() {
   window.close();
 }

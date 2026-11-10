@@ -67,12 +67,13 @@ async function extensionHighlight(claims) {
   }
 }
 async function extensionFocus(claimId) {
-  await extensionApi.tabs.sendMessage(extensionTab, {
-    type: "VITAL_FOCUS_CLAIM",
-    claimId,
+  const result = await extensionApi.tabs.sendMessage(extensionTab, {
+    type: "VITAL_FOCUS_CLAIM", claimId,
   });
-  if (hostMobile) extensionClose();
+  if (result?.found) { if (hostMobile) extensionClose(); }
+  return Boolean(result?.found);
 }
+
 function extensionClose() {
   window.parent.postMessage({ type: "VITAL_FRAME_CLOSE" }, "*");
   extensionApi.runtime

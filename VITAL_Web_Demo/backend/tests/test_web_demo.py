@@ -448,7 +448,7 @@ def test_demo_widget_import_read_and_shutdown(demo, monkeypatch):
         assert client.post("/api/widget/articles", json=article_data()).status_code == 200
 
 
-def test_visitor_articles_prepend_to_shared_catalogue_and_start_analysis(
+def test_article_import_requires_admin_and_admin_import_still_works(
     demo, monkeypatch
 ):
     async def fake_import(url, directory):
@@ -470,6 +470,12 @@ def test_visitor_articles_prepend_to_shared_catalogue_and_start_analysis(
         result = client.post(
             "/api/demo/import", json={"url": "https://example.com/new"}
         )
+        assert result.status_code == 401
+        assert started == []
+        assert len(client.get("/api/demo/articles").json()) == 1
+        assert "addArticleForm" not in client.get("/").text
+        assert client.post("/api/admin/login", json={"password": "test-organizer-password"}).status_code == 200
+        result = client.post("/api/demo/import", json={"url": "https://example.com/new"})
         assert result.status_code == 200
         cards = client.get("/api/demo/articles").json()
         assert [item["id"] for item in cards] == [result.json()["id"], original["id"]]
